@@ -1,0 +1,6 @@
+{
+  "open-context": {
+    "command": "/path/to/open-context/open-context",
+    "args": []
+  }
+}
