@@ -45,9 +45,9 @@ echo "Test 4: Get Go basics documentation"
 echo '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_docs","arguments":{"id":"basics","language":"go"}}}' | ./open-context | $JQ_CMD
 echo ""
 
-# Test 5: List languages
-echo "Test 5: List all languages"
-echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"list_languages","arguments":{}}}' | ./open-context | $JQ_CMD
+# Test 5: List docs
+echo "Test 5: List all available documentation"
+echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"list_docs","arguments":{}}}' | ./open-context | $JQ_CMD
 echo ""
 
 # Test 6: Get Go version info (new feature)

@@ -9,10 +9,11 @@ import (
 )
 
 type Provider struct {
-	languages map[string]*Language
+	documentations map[string]*Documentation
+	cacheDir       string
 }
 
-type Language struct {
+type Documentation struct {
 	Name        string            `json:"name"`
 	DisplayName string            `json:"displayName"`
 	Description string            `json:"description"`
@@ -20,48 +21,49 @@ type Language struct {
 }
 
 type Topic struct {
-	ID          string   `json:"id"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Content     string   `json:"content"`
-	Keywords    []string `json:"keywords"`
-	Language    string   `json:"language"`
+	ID            string   `json:"id"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	Content       string   `json:"content"`
+	Keywords      []string `json:"keywords"`
+	Documentation string   `json:"documentation"`
 }
 
 type SearchResult struct {
-	ID          string  `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Language    string  `json:"language"`
-	Score       float64 `json:"score"`
+	ID            string  `json:"id"`
+	Title         string  `json:"title"`
+	Description   string  `json:"description"`
+	Documentation string  `json:"documentation"`
+	Score         float64 `json:"score"`
 }
 
-func NewProvider() *Provider {
+func NewProvider(cacheDir string) (*Provider, error) {
 	p := &Provider{
-		languages: make(map[string]*Language),
+		documentations: make(map[string]*Documentation),
+		cacheDir:       cacheDir,
 	}
 
-	// Load all documentation from data directory
+	// Load all documentation from cache directory
 	if err := p.loadDocumentation(); err != nil {
 		// If loading fails, initialize with empty data
 		// This allows the server to run even without documentation
 		fmt.Fprintf(os.Stderr, "Warning: failed to load documentation: %v\n", err)
 	}
 
-	return p
+	return p, nil
 }
 
 func (p *Provider) loadDocumentation() error {
-	dataDir := filepath.Join(".", "data")
+	// Use the cache directory provided during initialization
+	dataDir := p.cacheDir
 
 	// Check if data directory exists
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		// Initialize with built-in Go documentation
-		p.initializeDefaultDocs()
+		fmt.Fprintf(os.Stderr, "Info: Cache directory is empty. Use 'get_go_info' tool for on-demand fetching.\n")
 		return nil
 	}
 
-	// Walk through language directories
+	// Walk through documentation directories
 	entries, err := os.ReadDir(dataDir)
 	if err != nil {
 		return err
@@ -72,33 +74,33 @@ func (p *Provider) loadDocumentation() error {
 			continue
 		}
 
-		langName := entry.Name()
-		langDir := filepath.Join(dataDir, langName)
+		docName := entry.Name()
+		docDir := filepath.Join(dataDir, docName)
 
-		// Load language metadata
-		metadataPath := filepath.Join(langDir, "metadata.json")
-		var lang Language
+		// Load Documentation metadata
+		metadataPath := filepath.Join(docDir, "metadata.json")
+		var documentation Documentation
 
 		if data, err := os.ReadFile(metadataPath); err == nil {
-			if err := json.Unmarshal(data, &lang); err != nil {
-				return fmt.Errorf("failed to parse metadata for %s: %w", langName, err)
+			if err := json.Unmarshal(data, &documentation); err != nil {
+				return fmt.Errorf("failed to parse metadata for %s: %w", docName, err)
 			}
 		} else {
 			// Default metadata if file doesn't exist
-			lang = Language{
-				Name:        langName,
-				DisplayName: strings.Title(langName),
-				Description: fmt.Sprintf("Documentation for %s", langName),
+			documentation = Documentation{
+				Name:        docName,
+				DisplayName: strings.Title(docName),
+				Description: fmt.Sprintf("Documentation for %s", docName),
 			}
 		}
 
 		// Ensure Topics map is initialized
-		if lang.Topics == nil {
-			lang.Topics = make(map[string]*Topic)
+		if documentation.Topics == nil {
+			documentation.Topics = make(map[string]*Topic)
 		}
 
 		// Load topics
-		topicsDir := filepath.Join(langDir, "topics")
+		topicsDir := filepath.Join(docDir, "topics")
 		if topicEntries, err := os.ReadDir(topicsDir); err == nil {
 			for _, topicEntry := range topicEntries {
 				if topicEntry.IsDir() || !strings.HasSuffix(topicEntry.Name(), ".json") {
@@ -116,285 +118,41 @@ func (p *Provider) loadDocumentation() error {
 					continue
 				}
 
-				topic.Language = langName
-				lang.Topics[topic.ID] = &topic
+				topic.Documentation = docName
+				documentation.Topics[topic.ID] = &topic
 			}
 		}
 
-		p.languages[langName] = &lang
+		p.documentations[docName] = &documentation
 	}
 
-	// If no languages were loaded, initialize with defaults
-	if len(p.languages) == 0 {
-		p.initializeDefaultDocs()
+	// Info message if no documentations were loaded
+	if len(p.documentations) == 0 {
+		fmt.Fprintf(os.Stderr, "Info: No documentation loaded. Use 'get_go_info' tool for on-demand fetching.\n")
 	}
 
 	return nil
 }
 
-func (p *Provider) initializeDefaultDocs() {
-	// Initialize with built-in Go documentation
-	goLang := &Language{
-		Name:        "go",
-		DisplayName: "Go",
-		Description: "Go programming language documentation",
-		Topics:      make(map[string]*Topic),
-	}
-
-	// Add some basic Go topics
-	goLang.Topics["basics"] = &Topic{
-		ID:          "basics",
-		Title:       "Go Basics",
-		Description: "Introduction to Go programming language",
-		Keywords:    []string{"basics", "introduction", "getting started", "hello world"},
-		Language:    "go",
-		Content: `# Go Basics
-
-Go is a statically typed, compiled programming language designed at Google.
-
-## Hello World
-
-` + "```go" + `
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}
-` + "```" + `
-
-## Key Features
-
-- **Simple and Clean**: Go has a simple syntax that's easy to learn
-- **Fast Compilation**: Go compiles quickly to machine code
-- **Built-in Concurrency**: Goroutines and channels make concurrent programming easy
-- **Strong Standard Library**: Comprehensive standard library for common tasks
-- **Static Typing**: Catch errors at compile time
-- **Garbage Collection**: Automatic memory management
-
-## Variables
-
-` + "```go" + `
-// Declare and initialize
-var name string = "John"
-var age int = 30
-
-// Short declaration
-message := "Hello"
-count := 42
-` + "```" + `
-
-## Functions
-
-` + "```go" + `
-func add(a, b int) int {
-    return a + b
-}
-
-// Multiple return values
-func swap(a, b string) (string, string) {
-    return b, a
-}
-` + "```",
-	}
-
-	goLang.Topics["goroutines"] = &Topic{
-		ID:          "goroutines",
-		Title:       "Goroutines and Concurrency",
-		Description: "Concurrent programming with goroutines and channels",
-		Keywords:    []string{"concurrency", "goroutines", "channels", "async", "parallel"},
-		Language:    "go",
-		Content: `# Goroutines and Concurrency
-
-Go makes concurrent programming simple with goroutines and channels.
-
-## Goroutines
-
-A goroutine is a lightweight thread managed by the Go runtime.
-
-` + "```go" + `
-package main
-
-import (
-    "fmt"
-    "time"
-)
-
-func say(s string) {
-    for i := 0; i < 3; i++ {
-        time.Sleep(100 * time.Millisecond)
-        fmt.Println(s)
-    }
-}
-
-func main() {
-    go say("world")  // Start a new goroutine
-    say("hello")     // Run in the main goroutine
-}
-` + "```" + `
-
-## Channels
-
-Channels are typed conduits for sending and receiving values with the channel operator <-.
-
-` + "```go" + `
-package main
-
-import "fmt"
-
-func sum(s []int, c chan int) {
-    sum := 0
-    for _, v := range s {
-        sum += v
-    }
-    c <- sum  // Send sum to channel
-}
-
-func main() {
-    s := []int{7, 2, 8, -9, 4, 0}
-
-    c := make(chan int)
-    go sum(s[:len(s)/2], c)
-    go sum(s[len(s)/2:], c)
-
-    x, y := <-c, <-c  // Receive from channel
-    fmt.Println(x, y, x+y)
-}
-` + "```" + `
-
-## Select Statement
-
-The select statement lets a goroutine wait on multiple communication operations.
-
-` + "```go" + `
-func fibonacci(c, quit chan int) {
-    x, y := 0, 1
-    for {
-        select {
-        case c <- x:
-            x, y = y, x+y
-        case <-quit:
-            fmt.Println("quit")
-            return
-        }
-    }
-}
-` + "```",
-	}
-
-	goLang.Topics["http"] = &Topic{
-		ID:          "http",
-		Title:       "HTTP Server and Client",
-		Description: "Building HTTP servers and making HTTP requests",
-		Keywords:    []string{"http", "server", "client", "web", "api", "rest"},
-		Language:    "go",
-		Content: `# HTTP Server and Client
-
-Go's net/http package provides excellent support for HTTP.
-
-## HTTP Server
-
-` + "```go" + `
-package main
-
-import (
-    "fmt"
-    "net/http"
-)
-
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
-}
-
-func main() {
-    http.HandleFunc("/", handler)
-    http.ListenAndServe(":8080", nil)
-}
-` + "```" + `
-
-## JSON API Example
-
-` + "```go" + `
-package main
-
-import (
-    "encoding/json"
-    "net/http"
-)
-
-type Response struct {
-    Message string ` + "`json:\"message\"`" + `
-    Status  string ` + "`json:\"status\"`" + `
-}
-
-func apiHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-
-    resp := Response{
-        Message: "Hello, API!",
-        Status:  "success",
-    }
-
-    json.NewEncoder(w).Encode(resp)
-}
-
-func main() {
-    http.HandleFunc("/api", apiHandler)
-    http.ListenAndServe(":8080", nil)
-}
-` + "```" + `
-
-## HTTP Client
-
-` + "```go" + `
-package main
-
-import (
-    "fmt"
-    "io"
-    "net/http"
-)
-
-func main() {
-    resp, err := http.Get("https://api.example.com/data")
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
-
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(string(body))
-}
-` + "```",
-	}
-
-	p.languages["go"] = goLang
-}
-
-func (p *Provider) Search(query string, language string) []SearchResult {
+func (p *Provider) Search(query string, documentation string) []SearchResult {
 	query = strings.ToLower(query)
 	var results []SearchResult
 
-	for langName, lang := range p.languages {
-		// Skip if language filter is specified and doesn't match
-		if language != "" && langName != language {
+	for docName, doc := range p.documentations {
+		// Skip if documentation filter is specified and doesn't match
+		if documentation != "" && docName != documentation {
 			continue
 		}
 
-		for _, topic := range lang.Topics {
+		for _, topic := range doc.Topics {
 			score := p.calculateScore(query, topic)
 			if score > 0 {
 				results = append(results, SearchResult{
-					ID:          topic.ID,
-					Title:       topic.Title,
-					Description: topic.Description,
-					Language:    langName,
-					Score:       score,
+					ID:            topic.ID,
+					Title:         topic.Title,
+					Description:   topic.Description,
+					Documentation: docName,
+					Score:         score,
 				})
 			}
 		}
@@ -440,16 +198,16 @@ func (p *Provider) calculateScore(query string, topic *Topic) float64 {
 	return score
 }
 
-func (p *Provider) GetDoc(id, language, topic string) (string, error) {
+func (p *Provider) GetDoc(id, doc, topic string) (string, error) {
 	// If ID is provided, use it directly
 	if id != "" {
-		for langName, lang := range p.languages {
-			if language != "" && langName != language {
+		for docName, documentation := range p.documentations {
+			if doc != "" && docName != doc {
 				continue
 			}
 
-			if doc, ok := lang.Topics[id]; ok {
-				return doc.Content, nil
+			if foundDoc, ok := documentation.Topics[id]; ok {
+				return foundDoc.Content, nil
 			}
 		}
 		return "", fmt.Errorf("documentation not found for id: %s", id)
@@ -457,14 +215,14 @@ func (p *Provider) GetDoc(id, language, topic string) (string, error) {
 
 	// If topic is provided, search by title
 	if topic != "" {
-		for langName, lang := range p.languages {
-			if language != "" && langName != language {
+		for docName, documentation := range p.documentations {
+			if doc != "" && docName != doc {
 				continue
 			}
 
-			for _, doc := range lang.Topics {
-				if strings.EqualFold(doc.Title, topic) || strings.EqualFold(doc.ID, topic) {
-					return doc.Content, nil
+			for _, foundDoc := range documentation.Topics {
+				if strings.EqualFold(foundDoc.Title, topic) || strings.EqualFold(foundDoc.ID, topic) {
+					return foundDoc.Content, nil
 				}
 			}
 		}
@@ -474,31 +232,31 @@ func (p *Provider) GetDoc(id, language, topic string) (string, error) {
 	return "", fmt.Errorf("either id or topic must be provided")
 }
 
-func (p *Provider) ListLanguages() []Language {
-	var languages []Language
+func (p *Provider) ListDocumentations() []Documentation {
+	var documentations []Documentation
 
-	for _, lang := range p.languages {
+	for _, documentation := range p.documentations {
 		// Create a copy without the full topic content
-		langCopy := Language{
-			Name:        lang.Name,
-			DisplayName: lang.DisplayName,
-			Description: lang.Description,
+		docCopy := Documentation{
+			Name:        documentation.Name,
+			DisplayName: documentation.DisplayName,
+			Description: documentation.Description,
 			Topics:      make(map[string]*Topic),
 		}
 
 		// Add topic summaries
-		for id, topic := range lang.Topics {
-			langCopy.Topics[id] = &Topic{
-				ID:          topic.ID,
-				Title:       topic.Title,
-				Description: topic.Description,
-				Keywords:    topic.Keywords,
-				Language:    topic.Language,
+		for id, topic := range documentation.Topics {
+			docCopy.Topics[id] = &Topic{
+				ID:            topic.ID,
+				Title:         topic.Title,
+				Description:   topic.Description,
+				Keywords:      topic.Keywords,
+				Documentation: topic.Documentation,
 			}
 		}
 
-		languages = append(languages, langCopy)
+		documentations = append(documentations, docCopy)
 	}
 
-	return languages
+	return documentations
 }

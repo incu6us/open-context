@@ -1,0 +1,21 @@
+---
+# Open Context Configuration File
+
+# Cache TTL (Time To Live) - How long cached data should be kept
+# Supported formats:
+#   - "0" or empty: No expiration (cache never expires)
+#   - "7d": 7 days
+#   - "24h": 24 hours
+#   - "30m": 30 minutes
+#   - "1w": 1 week (same as 7d)
+#
+# If a cached file is older than cache_ttl, it will be automatically
+# removed and fresh data will be fetched from the source.
+#
+# Examples:
+#   cache_ttl: 0      # Never expire (default)
+#   cache_ttl: 7d     # Expire after 7 days
+#   cache_ttl: 24h    # Expire after 24 hours
+#   cache_ttl: 1w     # Expire after 1 week
+
+cache_ttl: 7d

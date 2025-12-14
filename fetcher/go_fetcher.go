@@ -11,6 +11,10 @@ import (
 	"time"
 
 	"golang.org/x/net/html"
+	"gopkg.in/yaml.v3"
+
+	"github.com/incu6us/open-context/cache"
+	"github.com/incu6us/open-context/config"
 )
 
 const (
@@ -18,12 +22,14 @@ const (
 	goStdLibURL     = "https://pkg.go.dev/std"
 	goDevBaseURL    = "https://go.dev"
 	goRelNotesURL   = "https://go.dev/doc/devel/release"
+	goProxyBaseURL  = "https://proxy.golang.org"
 )
 
 type GoFetcher struct {
 	client      *http.Client
 	cacheDir    string
 	packageList []string
+	cache       *cache.Manager
 }
 
 type PackageDoc struct {
@@ -51,11 +57,24 @@ type LibraryInfo struct {
 }
 
 func NewGoFetcher(cacheDir string) *GoFetcher {
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to load config, using defaults: %v\n", err)
+		cfg = &config.Config{
+			CacheTTL: config.Duration{Duration: 0},
+		}
+	}
+
+	// Create cache manager
+	cacheManager := cache.NewManager(cacheDir, cfg.CacheTTL.Duration)
+
 	return &GoFetcher{
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 		cacheDir: cacheDir,
+		cache:    cacheManager,
 	}
 }
 
@@ -380,16 +399,14 @@ func getText(n *html.Node) string {
 
 // FetchGoVersion fetches and caches information about a specific Go version
 func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
-	// Check cache first
-	cachedPath := filepath.Join(f.cacheDir, "go", "versions", fmt.Sprintf("%s.json", version))
+	// Build cache path
+	cachedPath := f.cache.GetFilePath("go", "versions", fmt.Sprintf("%s.md", version))
 
 	// Try to load from cache
-	if data, err := os.ReadFile(cachedPath); err == nil {
-		var versionInfo GoVersionInfo
-		if err := json.Unmarshal(data, &versionInfo); err == nil {
-			fmt.Printf("Loaded Go %s info from cache\n", version)
-			return &versionInfo, nil
-		}
+	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
+	if err == nil && versionInfo != nil {
+		fmt.Printf("Loaded Go %s info from cache\n", version)
+		return versionInfo, nil
 	}
 
 	// Fetch from official Go website
@@ -414,7 +431,8 @@ func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
 	// Extract content
 	content := f.extractReleaseNotes(doc, version)
 
-	versionInfo := &GoVersionInfo{
+	// Create version info
+	versionInfo = &GoVersionInfo{
 		Version:     version,
 		ReleaseURL:  releaseURL,
 		ReleaseDate: f.extractReleaseDate(doc),
@@ -431,20 +449,38 @@ func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
 
 // FetchLibraryInfo fetches and caches information about a Go library/package
 func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, error) {
-	// Check cache first
+	// If no version specified, query the Go proxy to get the latest version
+	if version == "" {
+		latestVersion, err := f.getLatestVersion(importPath)
+		if err != nil {
+			// If we can't get the latest version, log a warning but continue without it
+			fmt.Fprintf(os.Stderr, "Warning: failed to get latest version for %s: %v\n", importPath, err)
+		} else {
+			// Check if the result includes a path change (format: "version:path")
+			if strings.Contains(latestVersion, ":") {
+				parts := strings.SplitN(latestVersion, ":", 2)
+				version = parts[0]
+				importPath = parts[1]
+				fmt.Printf("Resolved latest version for original path: %s@%s\n", importPath, version)
+			} else {
+				version = latestVersion
+				fmt.Printf("Resolved latest version for %s: %s\n", importPath, version)
+			}
+		}
+	}
+
+	// Build cache path
 	cacheKey := strings.ReplaceAll(importPath, "/", "_")
 	if version != "" {
 		cacheKey = fmt.Sprintf("%s_%s", cacheKey, version)
 	}
-	cachedPath := filepath.Join(f.cacheDir, "go", "libraries", fmt.Sprintf("%s.json", cacheKey))
+	cachedPath := f.cache.GetFilePath("go", "libraries", fmt.Sprintf("%s.md", cacheKey))
 
 	// Try to load from cache
-	if data, err := os.ReadFile(cachedPath); err == nil {
-		var libInfo LibraryInfo
-		if err := json.Unmarshal(data, &libInfo); err == nil {
-			fmt.Printf("Loaded %s info from cache\n", importPath)
-			return &libInfo, nil
-		}
+	libInfo, err := f.loadLibraryInfoFromMarkdown(cachedPath)
+	if err == nil && libInfo != nil {
+		fmt.Printf("Loaded %s info from cache\n", importPath)
+		return libInfo, nil
 	}
 
 	// Fetch from pkg.go.dev
@@ -471,7 +507,7 @@ func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, 
 	}
 
 	// Extract library information
-	libInfo := &LibraryInfo{
+	libInfo = &LibraryInfo{
 		ImportPath:  importPath,
 		Version:     version,
 		Synopsis:    f.extractSynopsis(doc),
@@ -644,8 +680,8 @@ func (f *GoFetcher) extractRepository(doc *html.Node) string {
 			for _, attr := range n.Attr {
 				if attr.Key == "href" {
 					if strings.Contains(attr.Val, "github.com") ||
-					   strings.Contains(attr.Val, "gitlab.com") ||
-					   strings.Contains(attr.Val, "bitbucket.org") {
+						strings.Contains(attr.Val, "gitlab.com") ||
+						strings.Contains(attr.Val, "bitbucket.org") {
 						repo = attr.Val
 						return
 					}
@@ -713,28 +749,18 @@ func (f *GoFetcher) extractList(n *html.Node, content *strings.Builder) {
 }
 
 func (f *GoFetcher) cacheVersionInfo(info *GoVersionInfo) error {
-	versionsDir := filepath.Join(f.cacheDir, "go", "versions")
-	if err := os.MkdirAll(versionsDir, 0755); err != nil {
-		return err
-	}
-
-	outputPath := filepath.Join(versionsDir, fmt.Sprintf("%s.json", info.Version))
-	return writeJSON(outputPath, info)
+	outputPath := f.cache.GetFilePath("go", "versions", fmt.Sprintf("%s.md", info.Version))
+	return f.saveVersionInfoAsMarkdown(outputPath, info)
 }
 
 func (f *GoFetcher) cacheLibraryInfo(info *LibraryInfo) error {
-	librariesDir := filepath.Join(f.cacheDir, "go", "libraries")
-	if err := os.MkdirAll(librariesDir, 0755); err != nil {
-		return err
-	}
-
 	filename := strings.ReplaceAll(info.ImportPath, "/", "_")
 	if info.Version != "" {
 		filename = fmt.Sprintf("%s_%s", filename, info.Version)
 	}
 
-	outputPath := filepath.Join(librariesDir, fmt.Sprintf("%s.json", filename))
-	return writeJSON(outputPath, info)
+	outputPath := f.cache.GetFilePath("go", "libraries", fmt.Sprintf("%s.md", filename))
+	return f.saveLibraryInfoAsMarkdown(outputPath, info)
 }
 
 func hasClass(n *html.Node, className string) bool {
@@ -763,4 +789,203 @@ func getHeadingLevel(tag string) int {
 	default:
 		return 2
 	}
+}
+
+// getLatestVersion queries the Go module proxy to find the latest version of a module
+// It checks for major versions v2, v3, v4, etc. to find the truly latest version
+func (f *GoFetcher) getLatestVersion(importPath string) (string, error) {
+	// Try to find the latest major version by checking v2, v3, v4, etc.
+	// We check up to v10 which should be sufficient for most packages
+	var latestVersion string
+	var latestPath string
+
+	// First, check the base path (v0 or v1)
+	baseVersion, err := f.queryProxyLatest(importPath)
+	if err == nil {
+		latestVersion = baseVersion
+		latestPath = importPath
+	}
+
+	// Check for v2, v3, v4, ... v10
+	for major := 2; major <= 10; major++ {
+		testPath := fmt.Sprintf("%s/v%d", importPath, major)
+		version, err := f.queryProxyLatest(testPath)
+		if err == nil {
+			// Found a newer major version
+			latestVersion = version
+			latestPath = testPath
+		}
+	}
+
+	if latestVersion == "" {
+		return "", fmt.Errorf("no versions found for %s", importPath)
+	}
+
+	// If we found a different path (with major version suffix), update the import path
+	if latestPath != importPath {
+		fmt.Printf("Found newer major version at %s (%s)\n", latestPath, latestVersion)
+		// Return the path with major version so caller knows to use it
+		return latestVersion + ":" + latestPath, nil
+	}
+
+	return latestVersion, nil
+}
+
+// queryProxyLatest queries the Go proxy for the latest version of a specific module path
+func (f *GoFetcher) queryProxyLatest(importPath string) (string, error) {
+	url := fmt.Sprintf("%s/%s/@latest", goProxyBaseURL, importPath)
+
+	resp, err := f.client.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("status %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Version string `json:"Version"`
+		Time    string `json:"Time"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	return result.Version, nil
+}
+
+// Markdown conversion helpers
+
+func (f *GoFetcher) saveVersionInfoAsMarkdown(filePath string, info *GoVersionInfo) error {
+	dir := filepath.Dir(filePath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	var content strings.Builder
+
+	// YAML frontmatter
+	content.WriteString("---\n")
+	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+	content.WriteString("---\n\n")
+
+	// Markdown content
+	content.WriteString(info.Content)
+
+	return os.WriteFile(filePath, []byte(content.String()), 0644)
+}
+
+func (f *GoFetcher) saveLibraryInfoAsMarkdown(filePath string, info *LibraryInfo) error {
+	dir := filepath.Dir(filePath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	var content strings.Builder
+
+	// YAML frontmatter
+	content.WriteString("---\n")
+	content.WriteString(fmt.Sprintf("importPath: \"%s\"\n", info.ImportPath))
+	if info.Version != "" {
+		content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	}
+	if info.Synopsis != "" {
+		content.WriteString(fmt.Sprintf("synopsis: \"%s\"\n", strings.ReplaceAll(info.Synopsis, "\"", "\\\"")))
+	}
+	if info.Repository != "" {
+		content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
+	}
+	if info.License != "" {
+		content.WriteString(fmt.Sprintf("license: \"%s\"\n", info.License))
+	}
+	content.WriteString("---\n\n")
+
+	// Markdown content
+	content.WriteString(info.Description)
+
+	return os.WriteFile(filePath, []byte(content.String()), 0644)
+}
+
+func (f *GoFetcher) loadVersionInfoFromMarkdown(filePath string) (*GoVersionInfo, error) {
+	// Check if file is expired first
+	expired, err := f.cache.IsExpired(filePath)
+	if err != nil || expired {
+		return nil, fmt.Errorf("file not found or expired")
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	content := string(data)
+
+	// Split frontmatter and content
+	parts := strings.SplitN(content, "---", 3)
+	if len(parts) < 3 {
+		return nil, fmt.Errorf("invalid markdown format: missing frontmatter")
+	}
+
+	// Parse YAML frontmatter
+	var meta struct {
+		Version    string `yaml:"version"`
+		ReleaseURL string `yaml:"releaseURL"`
+	}
+
+	if err := yaml.Unmarshal([]byte(parts[1]), &meta); err != nil {
+		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
+
+	return &GoVersionInfo{
+		Version:    meta.Version,
+		ReleaseURL: meta.ReleaseURL,
+		Content:    strings.TrimSpace(parts[2]),
+	}, nil
+}
+
+func (f *GoFetcher) loadLibraryInfoFromMarkdown(filePath string) (*LibraryInfo, error) {
+	// Check if file is expired first
+	expired, err := f.cache.IsExpired(filePath)
+	if err != nil || expired {
+		return nil, fmt.Errorf("file not found or expired")
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	content := string(data)
+
+	// Split frontmatter and content
+	parts := strings.SplitN(content, "---", 3)
+	if len(parts) < 3 {
+		return nil, fmt.Errorf("invalid markdown format: missing frontmatter")
+	}
+
+	// Parse YAML frontmatter
+	var meta struct {
+		ImportPath string `yaml:"importPath"`
+		Version    string `yaml:"version"`
+		Synopsis   string `yaml:"synopsis"`
+		Repository string `yaml:"repository"`
+		License    string `yaml:"license"`
+	}
+
+	if err := yaml.Unmarshal([]byte(parts[1]), &meta); err != nil {
+		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
+
+	return &LibraryInfo{
+		ImportPath:  meta.ImportPath,
+		Version:     meta.Version,
+		Synopsis:    meta.Synopsis,
+		Description: strings.TrimSpace(parts[2]),
+		Repository:  meta.Repository,
+		License:     meta.License,
+	}, nil
 }

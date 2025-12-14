@@ -6,11 +6,11 @@ An MCP (Model Context Protocol) server that provides up-to-date documentation fo
 
 - **MCP Protocol Support**: Seamless integration with Claude, Cursor, and other MCP clients
 - **Auto-Fetch from Official Sources**: Automatically download Go standard library docs from pkg.go.dev
-- **Built-in Documentation**: Comes with curated Go and TypeScript documentation
+- **On-Demand Fetching**: Use `get_go_info` tool to fetch Go versions and library docs from official sources
 - **Easy to Extend**: Simple JSON-based structure for adding new languages (TypeScript, Jenkins, etc.)
 - **Fast & Lightweight**: Written in Go for optimal performance
 - **Intelligent Search**: Keyword-based search across all documentation with scoring
-- **Simple Maintenance**: JSON-based documentation storage
+- **Simple Maintenance**: JSON-based documentation storage with local caching
 
 ## Installation
 
@@ -30,34 +30,96 @@ make setup
 
 # Or build manually
 go build -o open-context
-go build -o fetch-docs ./cmd/fetch
 ```
 
-### Fetch Go Standard Library Documentation
+**Note**: On first run, open-context automatically creates:
+- `~/.open-context/cache/` - Cache directory for downloaded documentation
+- `~/.open-context/config.yaml` - Configuration file with default settings (7-day cache TTL)
 
-Automatically download documentation from pkg.go.dev:
+This works regardless of installation method (local build, `go install`, or package managers like Homebrew).
+
+### On-Demand Documentation Fetching
+
+Open Context uses the `get_go_info` tool to fetch documentation on-demand from official sources:
+
+- **Go versions**: Fetches release notes from go.dev
+- **Go libraries**: Fetches package documentation from pkg.go.dev
+
+All fetched documentation is automatically cached locally in `~/.open-context/cache/` for fast retrieval.
+
+## Configuration
+
+Open Context uses a configuration file located at `~/.open-context/config.yaml`. This file is automatically created on first run with sensible defaults.
+
+### Default Configuration
+
+```yaml
+# Cache TTL (Time To Live) - How long cached data should be kept
+# Supported formats:
+#   - "0" or empty: No expiration (cache never expires)
+#   - "7d": 7 days (default)
+#   - "24h": 24 hours
+#   - "30m": 30 minutes
+#   - "1w": 1 week (same as 7d)
+
+cache_ttl: 7d
+```
+
+### Customizing Configuration
+
+Edit `~/.open-context/config.yaml` to change settings:
 
 ```bash
-# Using make
-make fetch-go
+# Open the config file in your editor
+nano ~/.open-context/config.yaml
 
-# Using the script
-./scripts/fetch-go-docs.sh
-
-# Or directly
-./fetch-docs -language=go -output=./data
+# Or use your preferred editor
+code ~/.open-context/config.yaml
 ```
 
-This will fetch ~100 commonly used Go standard library packages and make them searchable through the MCP server.
+**Cache TTL Examples**:
+- `cache_ttl: 0` - Cache never expires (useful for offline work)
+- `cache_ttl: 24h` - Refresh cache daily
+- `cache_ttl: 1w` - Refresh cache weekly
+
+Changes take effect on the next run of open-context.
 
 ## Usage
 
-### Running the server
+### CLI Usage
+
+Open Context includes a CLI built with **urfave/cli v3.6.1** (latest version).
+
+#### Running the server
 
 The server uses stdio transport for MCP communication:
 
 ```bash
 ./open-context
+```
+
+#### Managing cache
+
+Clear all cached data using the `--clear-cache` flag:
+
+```bash
+# Clear cache using full flag
+./open-context --clear-cache
+
+# Or use the short alias
+./open-context --cc
+```
+
+This removes the entire `~/.open-context/cache` directory. Cached data will be automatically refetched on next use.
+
+#### Other options
+
+```bash
+# Show help
+./open-context --help
+
+# Show version
+./open-context --version
 ```
 
 ### Configuration for MCP Clients
@@ -102,6 +164,16 @@ Add to your MCP configuration:
 claude-code mcp add open-context /path/to/open-context
 ```
 
+## Quick Start with Prompts
+
+Once configured, simply type in your conversation with Claude:
+
+```
+use open-context for go
+```
+
+Claude will automatically activate the documentation and use the tools to answer your questions! See [USING_PROMPTS.md](USING_PROMPTS.md) for details.
+
 ## Available Tools
 
 The server provides four MCP tools:
@@ -133,13 +205,13 @@ Get detailed documentation for a specific topic.
 Get documentation for topic "basics" in Go
 ```
 
-### 3. list_languages
+### 3. list_docs
 
-List all available programming languages and their topics.
+List all available documentation languages and their topics.
 
 **Example:**
 ```
-List all available documentation languages
+List all available documentation
 ```
 
 ### 4. get_go_info
@@ -166,6 +238,28 @@ Get information about github.com/spf13/cobra version v1.8.0
 - Returns markdown-formatted documentation
 
 See [GO_VERSION_LIBRARY_FEATURE.md](GO_VERSION_LIBRARY_FEATURE.md) for detailed documentation.
+
+## Available Prompts
+
+The server provides MCP prompts for easy activation:
+
+### use-docs
+
+Automatically activates documentation in your conversation with Claude.
+
+**Usage:**
+```
+use open-context
+use open-context for go
+use open-context for typescript
+```
+
+When you type this in your conversation with Claude, it will:
+- Understand which documentation is available
+- Automatically use the appropriate tools
+- Provide context-aware answers from the documentation
+
+See [USING_PROMPTS.md](USING_PROMPTS.md) for complete guide and examples.
 
 ## Adding New Documentation
 

@@ -67,7 +67,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | ./open-conte
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | ./open-context | jq .
 ```
 
-**Expected:** 4 tools listed (search_docs, get_docs, list_languages, get_go_info)
+**Expected:** 4 tools listed (search_docs, get_docs, list_docs, get_go_info)
 
 ### 3. Search Documentation
 
@@ -384,4 +384,3 @@ After successful testing:
 
 - [MCP Protocol Specification](https://modelcontextprotocol.io/)
 - [GO_VERSION_LIBRARY_FEATURE.md](GO_VERSION_LIBRARY_FEATURE.md) - Feature documentation
-- [examples/go_version_library_usage.md](examples/go_version_library_usage.md) - Usage examples

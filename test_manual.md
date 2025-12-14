@@ -134,9 +134,9 @@ cat data/go/versions/1.22.json | jq .
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_docs","arguments":{"id":"basics","language":"go"}}}
 ```
 
-### List Languages
+### List Documentation
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_languages","arguments":{}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_docs","arguments":{}}}
 ```
 
 ## Debugging

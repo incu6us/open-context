@@ -14,10 +14,11 @@ Full implementation of the Model Context Protocol (MCP) for seamless integration
 - Claude Code CLI
 - Any MCP-compatible client
 
-**Three MCP Tools:**
+**Four MCP Tools:**
 - `search_docs`: Intelligent search across all documentation
 - `get_docs`: Retrieve specific documentation topics
-- `list_languages`: Browse available languages and topics
+- `list_docs`: Browse available documentation and topics
+- `get_go_info`: Fetch Go version info and library documentation from official sources (go.dev, pkg.go.dev)
 
 ### 2. Automatic Documentation Fetching
 
@@ -35,7 +36,8 @@ make fetch-go
 - Extracts synopsis and descriptions from official pages
 - Generates clean, searchable markdown documentation
 - Rate-limited to respect pkg.go.dev servers
-- Caches results locally in `data/go/topics/`
+- Caches results locally in `~/.open-context/cache/`
+- Automatic cache expiration based on configurable TTL
 
 **How it works:**
 1. Scrapes pkg.go.dev/std for package list
@@ -44,7 +46,52 @@ make fetch-go
 4. Extracts metadata and creates markdown
 5. Saves in Open Context JSON format
 
-### 3. Intelligent Search System
+### 3. Configuration & Cache Management
+
+**Auto-Configuration**
+
+On first run, Open Context automatically creates:
+- `~/.open-context/config.yaml` - Configuration file with sensible defaults
+- `~/.open-context/cache/` - Cache directory for downloaded documentation
+
+**Cache TTL (Time To Live)**
+
+Configure how long cached data should be kept:
+
+```yaml
+# ~/.open-context/config.yaml
+cache_ttl: 7d  # Expire after 7 days (default)
+```
+
+**Supported Duration Formats:**
+- `0` - Never expire (permanent cache)
+- `7d` - 7 days
+- `24h` - 24 hours
+- `30m` - 30 minutes
+- `1w` - 1 week
+
+**Cache Clearing**
+
+Clear all cached data using the CLI:
+
+```bash
+# Clear cache
+./open-context --clear-cache
+
+# Or use the short alias
+./open-context --cc
+```
+
+**Cross-Platform Support**
+
+Works seamlessly regardless of installation method:
+- Direct build (`go build`)
+- Go install (`go install`)
+- Package managers (Homebrew, etc.)
+
+Configuration and cache are always stored in `~/.open-context/` on all platforms (macOS, Linux, Windows).
+
+### 4. Intelligent Search System
 
 **Scored Search Results:**
 - Title matches: 10 points
@@ -58,16 +105,11 @@ make fetch-go
 - Keyword-based matching
 - Fast in-memory search
 
-### 4. Extensible Architecture
+### 5. Extensible Architecture
 
-**Two Ways to Add Documentation:**
+**Adding Documentation:**
 
-**A. Auto-Fetch (For Supported Languages)**
-```bash
-./fetch-docs -language=go -output=./data
-```
-
-**B. Manual (For Any Language/Framework)**
+**Manual Documentation (For Any Language/Framework)**
 ```bash
 # Create structure
 mkdir -p data/jenkins/topics
@@ -93,7 +135,7 @@ cat > data/jenkins/topics/pipeline.json << 'EOF'
 EOF
 ```
 
-### 5. Built-in Documentation
+### 6. Built-in Documentation
 
 Ships with curated documentation:
 
@@ -231,26 +273,29 @@ make fetch-go  # Re-fetch Go stdlib
 
 ### Add a New Language Fetcher
 
+Fetchers can be created to support additional languages using the on-demand fetching pattern:
+
 1. Create `fetcher/<language>_fetcher.go`
-2. Implement fetching logic
-3. Add to `cmd/fetch/main.go`
-4. Run: `./fetch-docs -language=<language>`
+2. Implement fetching logic similar to `go_fetcher.go`
+3. Add new MCP tool to expose the fetcher functionality
+4. Documentation is automatically cached on first request
 
 ### Example Structure
 ```go
 type PythonFetcher struct {
     client   *http.Client
-    cacheDir string
+    cache    *cache.Cache
 }
 
-func (f *PythonFetcher) FetchDocs() error {
-    // 1. Get package list
-    // 2. For each package:
-    //    - Fetch documentation
+func (f *PythonFetcher) FetchPackageInfo(packageName, version string) (*PackageInfo, error) {
+    // 1. Check cache first
+    // 2. If not cached:
+    //    - Fetch from official source (e.g., pypi.org)
     //    - Parse content
-    //    - Convert to topic format
-    //    - Save JSON
-    return nil
+    //    - Convert to markdown with YAML frontmatter
+    //    - Save to cache
+    // 3. Return package info
+    return packageInfo, nil
 }
 ```
 
