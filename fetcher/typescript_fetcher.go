@@ -11,15 +11,7 @@ import (
 	"time"
 
 	yaml "gopkg.in/yaml.v3"
-
-	"github.com/incu6us/open-context/cache"
-	"github.com/incu6us/open-context/config"
 )
-
-type TypeScriptFetcher struct {
-	client *http.Client
-	cache  *cache.Manager
-}
 
 type TypeScriptVersionInfo struct {
 	Version     string `yaml:"version"`
@@ -28,24 +20,13 @@ type TypeScriptVersionInfo struct {
 	Content     string `yaml:"-"`
 }
 
+type TypeScriptFetcher struct {
+	*BaseFetcher
+}
+
 func NewTypeScriptFetcher(cacheDir string) *TypeScriptFetcher {
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: failed to load config, using defaults: %v\n", err)
-		cfg = &config.Config{
-			CacheTTL: config.Duration{Duration: 0},
-		}
-	}
-
-	// Create cache manager
-	cacheManager := cache.NewManager(cacheDir, cfg.CacheTTL.Duration)
-
 	return &TypeScriptFetcher{
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-		cache: cacheManager,
+		BaseFetcher: NewBaseFetcher(cacheDir),
 	}
 }
 

@@ -12,9 +12,6 @@ import (
 
 	"golang.org/x/net/html"
 	yaml "gopkg.in/yaml.v3"
-
-	"github.com/incu6us/open-context/cache"
-	"github.com/incu6us/open-context/config"
 )
 
 const (
@@ -24,13 +21,6 @@ const (
 	goRelNotesURL   = "https://go.dev/doc/devel/release"
 	goProxyBaseURL  = "https://proxy.golang.org"
 )
-
-type GoFetcher struct {
-	client      *http.Client
-	cacheDir    string
-	packageList []string
-	cache       *cache.Manager
-}
 
 type PackageDoc struct {
 	Name        string   `json:"name"`
@@ -56,25 +46,16 @@ type LibraryInfo struct {
 	License     string `json:"license,omitempty"`
 }
 
+type GoFetcher struct {
+	*BaseFetcher
+	cacheDir    string
+	packageList []string
+}
+
 func NewGoFetcher(cacheDir string) *GoFetcher {
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: failed to load config, using defaults: %v\n", err)
-		cfg = &config.Config{
-			CacheTTL: config.Duration{Duration: 0},
-		}
-	}
-
-	// Create cache manager
-	cacheManager := cache.NewManager(cacheDir, cfg.CacheTTL.Duration)
-
 	return &GoFetcher{
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-		cacheDir: cacheDir,
-		cache:    cacheManager,
+		BaseFetcher: NewBaseFetcher(cacheDir),
+		cacheDir:    cacheDir,
 	}
 }
 

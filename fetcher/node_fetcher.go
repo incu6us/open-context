@@ -8,18 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	yaml "gopkg.in/yaml.v3"
-
-	"github.com/incu6us/open-context/cache"
-	"github.com/incu6us/open-context/config"
 )
-
-type NodeFetcher struct {
-	client *http.Client
-	cache  *cache.Manager
-}
 
 type NodeVersionInfo struct {
 	Version     string `yaml:"version"`
@@ -28,24 +19,13 @@ type NodeVersionInfo struct {
 	Content     string `yaml:"-"`
 }
 
+type NodeFetcher struct {
+	*BaseFetcher
+}
+
 func NewNodeFetcher(cacheDir string) *NodeFetcher {
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: failed to load config, using defaults: %v\n", err)
-		cfg = &config.Config{
-			CacheTTL: config.Duration{Duration: 0},
-		}
-	}
-
-	// Create cache manager
-	cacheManager := cache.NewManager(cacheDir, cfg.CacheTTL.Duration)
-
 	return &NodeFetcher{
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-		cache: cacheManager,
+		BaseFetcher: NewBaseFetcher(cacheDir),
 	}
 }
 
