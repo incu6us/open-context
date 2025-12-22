@@ -113,29 +113,40 @@ go test ./...
 
 ```
 open-context/
-├── main.go              # Entry point & CLI
+├── main.go              # Entry point, CLI, and version variables
 ├── server/
 │   ├── server.go        # MCP protocol & tool handlers
 │   └── http.go          # HTTP transport
-├── docs/
+├── provider/
 │   └── provider.go      # Documentation search & retrieval
+├── config/
+│   └── config.go        # Configuration management
 ├── fetcher/             # External source fetchers
-│   ├── base_fetcher.go  # Common fetcher functionality
+│   ├── base.go          # BaseFetcher with common functionality
 │   ├── go_fetcher.go    # Go packages (pkg.go.dev)
 │   ├── npm_fetcher.go   # npm packages
 │   ├── python_fetcher.go # PyPI packages
 │   ├── rust_fetcher.go  # crates.io packages
-│   ├── docker_fetcher.go # Docker Hub images
-│   └── ...              # Other tool fetchers
+│   ├── docker_image_fetcher.go # Docker Hub images
+│   ├── github_actions_fetcher.go # GitHub Actions
+│   ├── node_fetcher.go  # Node.js versions
+│   ├── typescript_fetcher.go # TypeScript versions
+│   ├── react_fetcher.go # React versions
+│   ├── nextjs_fetcher.go # Next.js versions
+│   ├── ansible_fetcher.go # Ansible versions
+│   ├── terraform_fetcher.go # Terraform versions
+│   ├── jenkins_fetcher.go # Jenkins versions
+│   ├── kubernetes_fetcher.go # Kubernetes versions
+│   └── helm_fetcher.go  # Helm versions
 ├── cache/
-│   └── cache.go         # Cache management
+│   └── cache.go         # Cache management with TTL
 ├── data/                # Local documentation storage
 │   └── <language>/
 │       ├── metadata.json
 │       └── topics/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml       # CI/CD pipeline
+│       └── ci.yml       # CI/CD with automated releases
 └── test.sh              # Integration tests
 ```
 
@@ -146,6 +157,184 @@ open-context/
 - Add comments for exported functions
 - Keep functions focused and small
 - Use meaningful variable names
+
+## Adding New Fetchers
+
+To add a new fetcher for external data sources:
+
+### 1. Create the Fetcher File
+
+Create `fetcher/<name>_fetcher.go`:
+
+```go
+package fetcher
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type YourServiceInfo struct {
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	// Add fields specific to your service
+}
+
+type YourServiceFetcher struct {
+	*BaseFetcher
+}
+
+func NewYourServiceFetcher(cacheDir string) *YourServiceFetcher {
+	return &YourServiceFetcher{
+		BaseFetcher: NewBaseFetcher(cacheDir),
+	}
+}
+
+func (f *YourServiceFetcher) FetchInfo(name, version string) (*YourServiceInfo, error) {
+	cacheKey := fmt.Sprintf("yourservice/%s/%s", name, version)
+
+	// Try to get from cache first
+	if cachedData, err := f.getCache().Get(cacheKey); err == nil {
+		var info YourServiceInfo
+		if err := json.Unmarshal(cachedData, &info); err == nil {
+			return &info, nil
+		}
+	}
+
+	// Fetch from external API
+	url := fmt.Sprintf("https://api.yourservice.com/%s/%s", name, version)
+	resp, err := f.getClient().Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Parse response
+	var info YourServiceInfo
+	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return nil, err
+	}
+
+	// Cache the result
+	if data, err := json.Marshal(info); err == nil {
+		_ = f.getCache().Set(cacheKey, data)
+	}
+
+	return &info, nil
+}
+```
+
+### 2. Add to Server
+
+In `server/server.go`:
+
+**a) Add fetcher field to MCPServer:**
+```go
+type MCPServer struct {
+	// ... existing fields
+	yourServiceFetcher *fetcher.YourServiceFetcher
+}
+```
+
+**b) Initialize in NewMCPServer():**
+```go
+yourServiceFetcher: fetcher.NewYourServiceFetcher(cacheDir),
+```
+
+**c) Add tool definition in handleToolsList():**
+```go
+{
+	Name:        "get_yourservice_info",
+	Description: "Fetch information about YourService packages",
+	InputSchema: map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"name": map[string]interface{}{
+				"type":        "string",
+				"description": "Package name",
+			},
+			"version": map[string]interface{}{
+				"type":        "string",
+				"description": "Package version (optional)",
+			},
+		},
+		"required": []string{"name"},
+	},
+},
+```
+
+**d) Add handler in handleToolCall():**
+```go
+case "get_yourservice_info":
+	return s.getYourServiceInfo(args)
+```
+
+**e) Implement handler method:**
+```go
+func (s *MCPServer) getYourServiceInfo(args map[string]interface{}) (string, error) {
+	name, ok := args["name"].(string)
+	if !ok || name == "" {
+		return "", fmt.Errorf("name parameter is required")
+	}
+
+	version := ""
+	if v, ok := args["version"].(string); ok {
+		version = v
+	}
+
+	info, err := s.yourServiceFetcher.FetchInfo(name, version)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch info: %w", err)
+	}
+
+	// Format response as markdown
+	response := fmt.Sprintf("# %s\n\nVersion: %s\n\n%s\n",
+		info.Name, info.Version, info.Description)
+
+	return response, nil
+}
+```
+
+### 3. Add Tests
+
+In `main_test.go`:
+
+**a) Add to expected tools list:**
+```go
+expectedTools := []string{
+	// ... existing tools
+	"get_yourservice_info",
+}
+```
+
+**b) Add test case:**
+```go
+{
+	name:     "YourService fetcher",
+	toolName: "get_yourservice_info",
+	arguments: map[string]interface{}{
+		"name": "example-package",
+	},
+	expectInContent: []string{"example-package"},
+	timeout:         defaultTimeout,
+},
+```
+
+### 4. Update Documentation
+
+Add your new tool to `README.md`:
+- Update the tools table
+- Add tool reference documentation
+- Add usage examples
+
+### Key Patterns
+
+- **Always use BaseFetcher**: Embed `*BaseFetcher` to get HTTP client and cache
+- **Cache everything**: Use `f.getCache()` to cache API responses
+- **Error handling**: Return descriptive errors with context
+- **Markdown output**: Format responses as markdown for better readability
+- **Optional parameters**: Handle optional parameters gracefully
 
 ## Conventional Commits
 
@@ -241,10 +430,24 @@ Common scopes in this project:
 ### Automated Releases
 
 When commits are merged to `master` branch, the CI pipeline will:
-1. Parse conventional commits since the last release
-2. Determine the next version based on commit types
-3. Create a git tag in semver format (e.g., `v0.1.0`)
-4. Generate a GitHub release with changelog
+1. Run tests, linting, and format checks
+2. Parse conventional commits since the last release using semantic-release
+3. Determine the next version based on commit types (feat=minor, fix=patch, BREAKING=major)
+4. Build cross-platform binaries for 7 platforms with version injection:
+   - Linux: amd64, arm64, armv7
+   - macOS: amd64, arm64
+   - Windows: amd64, arm64
+5. Inject version metadata via ldflags:
+   - `main.Tag` - The release version (e.g., v0.1.0)
+   - `main.Commit` - The full commit hash
+   - `main.SourceURL` - The repository URL
+   - `main.GoVersion` - The Go compiler version used
+6. Create a git tag in semver format (e.g., `v0.1.0`)
+7. Generate a GitHub release with changelog
+8. Attach all binaries to the release
+9. Update CHANGELOG.md automatically
+
+The version information is displayed when running `./open-context --version`
 
 ## Questions?
 
