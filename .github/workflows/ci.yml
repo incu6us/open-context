@@ -39,9 +39,13 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Run tests (Unix)
-      if: runner.os != 'Windows'
+    - name: Run tests (macOS)
+      if: matrix.os == 'macos-latest'
       run: go test -v -timeout 300s -race -coverprofile=coverage.out -covermode=atomic ./...
+
+    - name: Run tests (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: go test -v -timeout 300s -coverprofile=coverage.out -covermode=atomic ./...
 
     - name: Run tests (Windows)
       if: runner.os == 'Windows'
@@ -128,7 +132,7 @@ jobs:
 
     - name: Install semantic-release and dependencies
       run: |
-        npm install -g \
+        npm install -g --loglevel=error \
           semantic-release@23 \
           @semantic-release/git@10 \
           @semantic-release/changelog@6 \
