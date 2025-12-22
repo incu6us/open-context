@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	defaultTimeout = 30 * time.Second
+)
+
 // getBinaryName returns the correct binary name for the current platform
 func getBinaryName(name string) string {
 	if runtime.GOOS == "windows" {
@@ -242,6 +246,7 @@ func TestMCPServerToolsList(t *testing.T) {
 		"get_kubernetes_info",
 		"get_helm_info",
 		"get_docker_image",
+		"get_github_action",
 	}
 
 	toolNames := make(map[string]bool)
@@ -282,7 +287,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "1.6.0",
 			},
 			expectInContent: []string{"Terraform", "1.6", "tfenv install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Kubernetes fetcher",
@@ -291,7 +296,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "1.28.0",
 			},
 			expectInContent: []string{"Kubernetes", "1.28", "kubectl"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Helm fetcher",
@@ -300,7 +305,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "3.13.0",
 			},
 			expectInContent: []string{"Helm", "3.13", "curl"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Ansible fetcher",
@@ -309,7 +314,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "2.15.0",
 			},
 			expectInContent: []string{"Ansible", "2.15", "pip install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Node.js fetcher",
@@ -318,7 +323,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "20.0.0",
 			},
 			expectInContent: []string{"Node.js", "20.0", "nvm"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "npm fetcher",
@@ -327,7 +332,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"packageName": "express",
 			},
 			expectInContent: []string{"express", "npm install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Python fetcher",
@@ -336,7 +341,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"packageName": "requests",
 			},
 			expectInContent: []string{"requests", "pip install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Rust fetcher",
@@ -345,7 +350,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"crateName": "serde",
 			},
 			expectInContent: []string{"serde", "cargo add"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "React fetcher",
@@ -354,7 +359,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "18.0.0",
 			},
 			expectInContent: []string{"React", "18.0", "npm install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Next.js fetcher",
@@ -363,7 +368,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "14.0.0",
 			},
 			expectInContent: []string{"Next.js", "14.0", "npm install"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
 		},
 		{
 			name:     "Docker image fetcher",
@@ -373,7 +378,16 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"tag":   "1.25.5-bookworm",
 			},
 			expectInContent: []string{"Docker Image:", "golang:1.25.5-bookworm", "docker pull"},
-			timeout:         30 * time.Second,
+			timeout:         defaultTimeout,
+		},
+		{
+			name:     "GitHub Actions fetcher",
+			toolName: "get_github_action",
+			arguments: map[string]interface{}{
+				"repository": "actions/checkout",
+			},
+			expectInContent: []string{"checkout", "actions/checkout", "Usage Example"},
+			timeout:         defaultTimeout,
 		},
 	}
 

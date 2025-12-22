@@ -13,21 +13,22 @@ import (
 )
 
 type MCPServer struct {
-	docProvider       *provider.Provider
-	goFetcher         *fetcher.GoFetcher
-	npmFetcher        *fetcher.NPMFetcher
-	pythonFetcher     *fetcher.PythonFetcher
-	rustFetcher       *fetcher.RustFetcher
-	nodeFetcher       *fetcher.NodeFetcher
-	typescriptFetcher *fetcher.TypeScriptFetcher
-	nextjsFetcher     *fetcher.NextJSFetcher
-	reactFetcher      *fetcher.ReactFetcher
-	ansibleFetcher    *fetcher.AnsibleFetcher
-	terraformFetcher  *fetcher.TerraformFetcher
-	jenkinsFetcher    *fetcher.JenkinsFetcher
-	kubernetesFetcher *fetcher.KubernetesFetcher
-	helmFetcher       *fetcher.HelmFetcher
-	dockerFetcher     *fetcher.DockerImageFetcher
+	docProvider          *provider.Provider
+	goFetcher            *fetcher.GoFetcher
+	npmFetcher           *fetcher.NPMFetcher
+	pythonFetcher        *fetcher.PythonFetcher
+	rustFetcher          *fetcher.RustFetcher
+	nodeFetcher          *fetcher.NodeFetcher
+	typescriptFetcher    *fetcher.TypeScriptFetcher
+	nextjsFetcher        *fetcher.NextJSFetcher
+	reactFetcher         *fetcher.ReactFetcher
+	ansibleFetcher       *fetcher.AnsibleFetcher
+	terraformFetcher     *fetcher.TerraformFetcher
+	jenkinsFetcher       *fetcher.JenkinsFetcher
+	kubernetesFetcher    *fetcher.KubernetesFetcher
+	helmFetcher          *fetcher.HelmFetcher
+	dockerFetcher        *fetcher.DockerImageFetcher
+	githubActionsFetcher *fetcher.GitHubActionsFetcher
 }
 
 func NewMCPServer() (*MCPServer, error) {
@@ -44,21 +45,22 @@ func NewMCPServer() (*MCPServer, error) {
 	}
 
 	return &MCPServer{
-		docProvider:       docProvider,
-		goFetcher:         fetcher.NewGoFetcher(cacheDir),
-		npmFetcher:        fetcher.NewNPMFetcher(cacheDir),
-		pythonFetcher:     fetcher.NewPythonFetcher(cacheDir),
-		rustFetcher:       fetcher.NewRustFetcher(cacheDir),
-		nodeFetcher:       fetcher.NewNodeFetcher(cacheDir),
-		typescriptFetcher: fetcher.NewTypeScriptFetcher(cacheDir),
-		nextjsFetcher:     fetcher.NewNextJSFetcher(cacheDir),
-		reactFetcher:      fetcher.NewReactFetcher(cacheDir),
-		ansibleFetcher:    fetcher.NewAnsibleFetcher(cacheDir),
-		terraformFetcher:  fetcher.NewTerraformFetcher(cacheDir),
-		jenkinsFetcher:    fetcher.NewJenkinsFetcher(cacheDir),
-		kubernetesFetcher: fetcher.NewKubernetesFetcher(cacheDir),
-		helmFetcher:       fetcher.NewHelmFetcher(cacheDir),
-		dockerFetcher:     fetcher.NewDockerImageFetcher(cacheDir),
+		docProvider:          docProvider,
+		goFetcher:            fetcher.NewGoFetcher(cacheDir),
+		npmFetcher:           fetcher.NewNPMFetcher(cacheDir),
+		pythonFetcher:        fetcher.NewPythonFetcher(cacheDir),
+		rustFetcher:          fetcher.NewRustFetcher(cacheDir),
+		nodeFetcher:          fetcher.NewNodeFetcher(cacheDir),
+		typescriptFetcher:    fetcher.NewTypeScriptFetcher(cacheDir),
+		nextjsFetcher:        fetcher.NewNextJSFetcher(cacheDir),
+		reactFetcher:         fetcher.NewReactFetcher(cacheDir),
+		ansibleFetcher:       fetcher.NewAnsibleFetcher(cacheDir),
+		terraformFetcher:     fetcher.NewTerraformFetcher(cacheDir),
+		jenkinsFetcher:       fetcher.NewJenkinsFetcher(cacheDir),
+		kubernetesFetcher:    fetcher.NewKubernetesFetcher(cacheDir),
+		helmFetcher:          fetcher.NewHelmFetcher(cacheDir),
+		dockerFetcher:        fetcher.NewDockerImageFetcher(cacheDir),
+		githubActionsFetcher: fetcher.NewGitHubActionsFetcher(cacheDir),
 	}, nil
 }
 
@@ -439,6 +441,24 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 				"required": []string{"image", "tag"},
 			},
 		},
+		{
+			Name:        "get_github_action",
+			Description: "Fetch and cache information about GitHub Actions from GitHub API, including action metadata, inputs, and outputs",
+			InputSchema: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"repository": map[string]interface{}{
+						"type":        "string",
+						"description": "GitHub repository in format 'owner/repo' (e.g., 'actions/checkout', 'docker/setup-buildx-action')",
+					},
+					"version": map[string]interface{}{
+						"type":        "string",
+						"description": "Specific version/tag of the action (optional, defaults to latest release)",
+					},
+				},
+				"required": []string{"repository"},
+			},
+		},
 	}
 
 	return Response{
@@ -505,6 +525,8 @@ func (s *MCPServer) handleToolCall(req Request) Response {
 		result, err = s.getHelmInfo(params.Arguments)
 	case "get_docker_image":
 		result, err = s.getDockerImage(params.Arguments)
+	case "get_github_action":
+		result, err = s.getGitHubAction(params.Arguments)
 	default:
 		return Response{
 			JSONRPC: "2.0",
@@ -837,6 +859,25 @@ func (s *MCPServer) getDockerImage(args map[string]interface{}) (string, error) 
 	}
 
 	return imageInfo.Content, nil
+}
+
+func (s *MCPServer) getGitHubAction(args map[string]interface{}) (string, error) {
+	repository, ok := args["repository"].(string)
+	if !ok || repository == "" {
+		return "", fmt.Errorf("repository parameter is required")
+	}
+
+	version := ""
+	if v, ok := args["version"].(string); ok {
+		version = v
+	}
+
+	actionInfo, err := s.githubActionsFetcher.FetchActionInfo(repository, version)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch GitHub Action info: %w", err)
+	}
+
+	return actionInfo.Content, nil
 }
 
 func (s *MCPServer) handlePromptsList(req Request) Response {

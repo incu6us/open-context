@@ -10,12 +10,12 @@ Open Context fetches and caches documentation from official sources, making it i
 - **JavaScript/TypeScript**: npm packages, Node.js, React, Next.js versions
 - **Python**: PyPI packages with installation instructions and package metadata
 - **Rust**: Crates.io packages with version info and documentation links
-- **DevOps Tools**: Docker, Kubernetes, Helm, Terraform, Ansible, Jenkins
+- **DevOps Tools**: Docker, Kubernetes, Helm, Terraform, Ansible, Jenkins, GitHub Actions
 - **And more**: Easy to extend with any language or framework
 
 ## Key Features
 
-- **Always Up-to-Date**: Fetches from official sources (pkg.go.dev, npm registry, PyPI, crates.io, GitHub releases, Docker Hub)
+- **Always Up-to-Date**: Fetches from official sources (pkg.go.dev, npm registry, PyPI, crates.io, GitHub releases, GitHub API, Docker Hub)
 - **Smart Caching**: Local cache with configurable TTL (default: 7 days)
 - **Fast & Lightweight**: Written in Go, starts in milliseconds
 - **Two Transport Modes**: stdio for local use, HTTP for remote servers
@@ -320,6 +320,7 @@ The server provides 15 MCP tools for fetching documentation:
 | `get_kubernetes_info` | Kubernetes versions | 1.28.0 |
 | `get_helm_info` | Helm versions | 3.13.0 |
 | `get_docker_image` | Docker Hub images | golang:1.23-alpine |
+| `get_github_action` | GitHub Actions | actions/checkout, docker/setup-buildx-action |
 
 **All tools automatically:**
 - Fetch from official sources
@@ -594,6 +595,22 @@ Get Docker image golang:1.23-alpine
 ```
 
 **Source:** Docker Hub API
+
+### get_github_action
+
+Fetch GitHub Action information from GitHub API.
+
+**Parameters:**
+- `repository` (required): GitHub repository in format "owner/repo" (e.g., "actions/checkout", "docker/setup-buildx-action")
+- `version` (optional): Specific version/tag of the action (defaults to latest release)
+
+**Example:**
+```
+Get GitHub Action actions/checkout
+Get GitHub Action docker/setup-buildx-action with version v2.10.0
+```
+
+**Source:** GitHub API
 
 ---
 
