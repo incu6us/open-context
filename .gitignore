@@ -1,6 +1,5 @@
 # Binaries
 open-context
-fetch-docs
 *.exe
 *.dll
 *.so
@@ -11,6 +10,7 @@ fetch-docs
 
 # Output of the go coverage tool
 *.out
+coverage.txt
 
 # IDE
 .idea/

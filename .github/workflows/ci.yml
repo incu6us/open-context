@@ -39,8 +39,13 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Run tests
+    - name: Run tests (Unix)
+      if: runner.os != 'Windows'
       run: go test -v -timeout 600s -race -coverprofile=coverage.out -covermode=atomic ./...
+
+    - name: Run tests (Windows)
+      if: runner.os == 'Windows'
+      run: go test -v -timeout 600s -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest'
