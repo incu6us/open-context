@@ -39,7 +39,7 @@ func (f *HelmFetcher) FetchHelmVersion(version string) (*HelmVersionInfo, error)
 	}
 
 	// Check cache first
-	cachedPath := f.cache.GetFilePath("helm", "versions", fmt.Sprintf("%s.md", version))
+	cachedPath := f.getCache().GetFilePath("helm", "versions", fmt.Sprintf("%s.md", version))
 	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
 	if err == nil && versionInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded Helm version '%s' from cache\n", version)
@@ -60,7 +60,7 @@ func (f *HelmFetcher) FetchHelmVersion(version string) (*HelmVersionInfo, error)
 	req.Header.Set("User-Agent", "open-context-mcp-server")
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
-	resp, err := f.client.Do(req)
+	resp, err := f.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Helm release: %w", err)
 	}
@@ -209,7 +209,7 @@ func (f *HelmFetcher) saveVersionInfoAsMarkdown(filePath string, info *HelmVersi
 }
 
 func (f *HelmFetcher) loadVersionInfoFromMarkdown(filePath string) (*HelmVersionInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

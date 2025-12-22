@@ -72,7 +72,7 @@ func (f *GoFetcher) FetchStdLib() error {
 	fmt.Printf("Found %d standard library packages\n", len(packages))
 
 	// Create output directory
-	outputDir := filepath.Join(f.cacheDir, "go", "topics")
+	outputDir := filepath.Join(f.getCache().GetCacheDir(), "go", "topics")
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
@@ -84,7 +84,7 @@ func (f *GoFetcher) FetchStdLib() error {
 		"description": "Go standard library documentation (fetched from pkg.go.dev)",
 	}
 
-	metadataPath := filepath.Join(f.cacheDir, "go", "metadata.json")
+	metadataPath := filepath.Join(f.getCache().GetCacheDir(), "go", "metadata.json")
 	if err := writeJSON(metadataPath, metadata); err != nil {
 		return fmt.Errorf("failed to write metadata: %w", err)
 	}
@@ -123,7 +123,7 @@ func (f *GoFetcher) FetchStdLib() error {
 
 // getStdLibPackages retrieves the list of all standard library packages
 func (f *GoFetcher) getStdLibPackages() ([]string, error) {
-	resp, err := f.client.Get(goStdLibURL)
+	resp, err := f.getClient().Get(goStdLibURL)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (f *GoFetcher) getKeyPackages(allPackages []string) []string {
 func (f *GoFetcher) fetchPackageDoc(pkgPath string) (*PackageDoc, error) {
 	url := fmt.Sprintf("%s/%s", pkgGoDevBaseURL, pkgPath)
 
-	resp, err := f.client.Get(url)
+	resp, err := f.getClient().Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +381,7 @@ func getText(n *html.Node) string {
 // FetchGoVersion fetches and caches information about a specific Go version
 func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
 	// Build cache path
-	cachedPath := f.cache.GetFilePath("go", "versions", fmt.Sprintf("%s.md", version))
+	cachedPath := f.getCache().GetFilePath("go", "versions", fmt.Sprintf("%s.md", version))
 
 	// Try to load from cache
 	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
@@ -394,7 +394,7 @@ func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
 	fmt.Printf("Fetching Go %s information from official source...\n", version)
 
 	releaseURL := fmt.Sprintf("%s/doc/go%s", goDevBaseURL, version)
-	resp, err := f.client.Get(releaseURL)
+	resp, err := f.getClient().Get(releaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Go %s info: %w", version, err)
 	}
@@ -455,7 +455,7 @@ func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, 
 	if version != "" {
 		cacheKey = fmt.Sprintf("%s_%s", cacheKey, version)
 	}
-	cachedPath := f.cache.GetFilePath("go", "libraries", fmt.Sprintf("%s.md", cacheKey))
+	cachedPath := f.getCache().GetFilePath("go", "libraries", fmt.Sprintf("%s.md", cacheKey))
 
 	// Try to load from cache
 	libInfo, err := f.loadLibraryInfoFromMarkdown(cachedPath)
@@ -472,7 +472,7 @@ func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, 
 		url = fmt.Sprintf("%s/%s@%s", pkgGoDevBaseURL, importPath, version)
 	}
 
-	resp, err := f.client.Get(url)
+	resp, err := f.getClient().Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch library info: %w", err)
 	}
@@ -730,7 +730,7 @@ func (f *GoFetcher) extractList(n *html.Node, content *strings.Builder) {
 }
 
 func (f *GoFetcher) cacheVersionInfo(info *GoVersionInfo) error {
-	outputPath := f.cache.GetFilePath("go", "versions", fmt.Sprintf("%s.md", info.Version))
+	outputPath := f.getCache().GetFilePath("go", "versions", fmt.Sprintf("%s.md", info.Version))
 	return f.saveVersionInfoAsMarkdown(outputPath, info)
 }
 
@@ -740,7 +740,7 @@ func (f *GoFetcher) cacheLibraryInfo(info *LibraryInfo) error {
 		filename = fmt.Sprintf("%s_%s", filename, info.Version)
 	}
 
-	outputPath := f.cache.GetFilePath("go", "libraries", fmt.Sprintf("%s.md", filename))
+	outputPath := f.getCache().GetFilePath("go", "libraries", fmt.Sprintf("%s.md", filename))
 	return f.saveLibraryInfoAsMarkdown(outputPath, info)
 }
 
@@ -816,7 +816,7 @@ func (f *GoFetcher) getLatestVersion(importPath string) (string, error) {
 func (f *GoFetcher) queryProxyLatest(importPath string) (string, error) {
 	url := fmt.Sprintf("%s/%s/@latest", goProxyBaseURL, importPath)
 
-	resp, err := f.client.Get(url)
+	resp, err := f.getClient().Get(url)
 	if err != nil {
 		return "", err
 	}
@@ -893,7 +893,7 @@ func (f *GoFetcher) saveLibraryInfoAsMarkdown(filePath string, info *LibraryInfo
 
 func (f *GoFetcher) loadVersionInfoFromMarkdown(filePath string) (*GoVersionInfo, error) {
 	// Check if file is expired first
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}
@@ -930,7 +930,7 @@ func (f *GoFetcher) loadVersionInfoFromMarkdown(filePath string) (*GoVersionInfo
 
 func (f *GoFetcher) loadLibraryInfoFromMarkdown(filePath string) (*LibraryInfo, error) {
 	// Check if file is expired first
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

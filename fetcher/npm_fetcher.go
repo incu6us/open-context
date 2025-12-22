@@ -42,7 +42,7 @@ func (f *NPMFetcher) FetchPackageInfo(packageName, version string) (*NPMPackageI
 	}
 
 	// Check cache first
-	cachedPath := f.cache.GetFilePath("npm", "packages", fmt.Sprintf("%s.md", safeName))
+	cachedPath := f.getCache().GetFilePath("npm", "packages", fmt.Sprintf("%s.md", safeName))
 	pkgInfo, err := f.loadPackageInfoFromMarkdown(cachedPath)
 	if err == nil && pkgInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded npm package '%s' from cache\n", packageName)
@@ -59,7 +59,7 @@ func (f *NPMFetcher) FetchPackageInfo(packageName, version string) (*NPMPackageI
 		url = fmt.Sprintf("https://registry.npmjs.org/%s/latest", packageName)
 	}
 
-	resp, err := f.client.Get(url)
+	resp, err := f.getClient().Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch package info: %w", err)
 	}
@@ -213,7 +213,7 @@ func (f *NPMFetcher) savePackageInfoAsMarkdown(filePath string, info *NPMPackage
 }
 
 func (f *NPMFetcher) loadPackageInfoFromMarkdown(filePath string) (*NPMPackageInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

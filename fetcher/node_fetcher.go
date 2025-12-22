@@ -37,7 +37,7 @@ func (f *NodeFetcher) FetchNodeVersion(version string) (*NodeVersionInfo, error)
 	}
 
 	// Check cache first
-	cachedPath := f.cache.GetFilePath("node", "versions", fmt.Sprintf("%s.md", version))
+	cachedPath := f.getCache().GetFilePath("node", "versions", fmt.Sprintf("%s.md", version))
 	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
 	if err == nil && versionInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded Node.js version '%s' from cache\n", version)
@@ -48,7 +48,7 @@ func (f *NodeFetcher) FetchNodeVersion(version string) (*NodeVersionInfo, error)
 	fmt.Fprintf(os.Stderr, "Fetching Node.js version '%s' from nodejs.org...\n", version)
 
 	// First, get the version list to find details
-	resp, err := f.client.Get("https://nodejs.org/dist/index.json")
+	resp, err := f.getClient().Get("https://nodejs.org/dist/index.json")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Node.js version list: %w", err)
 	}
@@ -185,7 +185,7 @@ func (f *NodeFetcher) saveVersionInfoAsMarkdown(filePath string, info *NodeVersi
 }
 
 func (f *NodeFetcher) loadVersionInfoFromMarkdown(filePath string) (*NodeVersionInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

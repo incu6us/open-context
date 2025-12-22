@@ -42,12 +42,12 @@ func NewBaseFetcher(cacheDir string) *BaseFetcher {
 	}
 }
 
-// GetClient returns the HTTP client
-func (b *BaseFetcher) GetClient() *http.Client {
+// getClient returns the HTTP client
+func (b *BaseFetcher) getClient() *http.Client {
 	return b.client
 }
 
-// GetCache returns the cache manager
-func (b *BaseFetcher) GetCache() *cache.Manager {
+// getCache returns the cache manager
+func (b *BaseFetcher) getCache() *cache.Manager {
 	return b.cache
 }

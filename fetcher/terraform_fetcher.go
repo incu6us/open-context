@@ -39,7 +39,7 @@ func (f *TerraformFetcher) FetchTerraformVersion(version string) (*TerraformVers
 	}
 
 	// Check cache first
-	cachedPath := f.cache.GetFilePath("terraform", "versions", fmt.Sprintf("%s.md", version))
+	cachedPath := f.getCache().GetFilePath("terraform", "versions", fmt.Sprintf("%s.md", version))
 	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
 	if err == nil && versionInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded Terraform version '%s' from cache\n", version)
@@ -60,7 +60,7 @@ func (f *TerraformFetcher) FetchTerraformVersion(version string) (*TerraformVers
 	req.Header.Set("User-Agent", "open-context-mcp-server")
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
-	resp, err := f.client.Do(req)
+	resp, err := f.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Terraform release: %w", err)
 	}
@@ -198,7 +198,7 @@ func (f *TerraformFetcher) saveVersionInfoAsMarkdown(filePath string, info *Terr
 }
 
 func (f *TerraformFetcher) loadVersionInfoFromMarkdown(filePath string) (*TerraformVersionInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

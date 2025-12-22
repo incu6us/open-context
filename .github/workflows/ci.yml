@@ -45,7 +45,7 @@ jobs:
 
     - name: Run tests (Windows)
       if: runner.os == 'Windows'
-      run: go test -v -timeout 600s ./...
+      run: go test -v -timeout 300s ./...
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest'

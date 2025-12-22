@@ -56,7 +56,7 @@ func (f *DockerImageFetcher) FetchDockerImage(image, tag string) (*DockerImageIn
 
 	// Check cache first
 	cacheKey := fmt.Sprintf("%s_%s_%s", namespace, repository, tag)
-	cachedPath := f.cache.GetFilePath("docker", "images", fmt.Sprintf("%s.md", cacheKey))
+	cachedPath := f.getCache().GetFilePath("docker", "images", fmt.Sprintf("%s.md", cacheKey))
 	imageInfo, err := f.loadImageInfoFromMarkdown(cachedPath)
 	if err == nil && imageInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded Docker image '%s:%s' from cache\n", image, tag)
@@ -110,7 +110,7 @@ func (f *DockerImageFetcher) fetchTagInfo(namespace, repository, tag string) (*D
 	req.Header.Set("User-Agent", "open-context-mcp-server")
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := f.client.Do(req)
+	resp, err := f.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Docker image tag: %w", err)
 	}
@@ -172,7 +172,7 @@ func (f *DockerImageFetcher) fetchAvailableTags(namespace, repository string, li
 	req.Header.Set("User-Agent", "open-context-mcp-server")
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := f.client.Do(req)
+	resp, err := f.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch tags: %w", err)
 	}
@@ -306,7 +306,7 @@ func (f *DockerImageFetcher) saveImageInfoAsMarkdown(filePath string, info *Dock
 }
 
 func (f *DockerImageFetcher) loadImageInfoFromMarkdown(filePath string) (*DockerImageInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}

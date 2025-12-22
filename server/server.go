@@ -8,12 +8,12 @@ import (
 	"log"
 
 	"github.com/incu6us/open-context/config"
-	"github.com/incu6us/open-context/docs"
 	"github.com/incu6us/open-context/fetcher"
+	"github.com/incu6us/open-context/provider"
 )
 
 type MCPServer struct {
-	docProvider       *docs.Provider
+	docProvider       *provider.Provider
 	goFetcher         *fetcher.GoFetcher
 	npmFetcher        *fetcher.NPMFetcher
 	nodeFetcher       *fetcher.NodeFetcher
@@ -36,7 +36,7 @@ func NewMCPServer() (*MCPServer, error) {
 	}
 
 	// Create doc provider with cache directory
-	docProvider, err := docs.NewProvider(cacheDir)
+	docProvider, err := provider.NewProvider(cacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize doc provider: %w", err)
 	}

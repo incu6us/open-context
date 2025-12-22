@@ -39,7 +39,7 @@ func (f *KubernetesFetcher) FetchKubernetesVersion(version string) (*KubernetesV
 	}
 
 	// Check cache first
-	cachedPath := f.cache.GetFilePath("kubernetes", "versions", fmt.Sprintf("%s.md", version))
+	cachedPath := f.getCache().GetFilePath("kubernetes", "versions", fmt.Sprintf("%s.md", version))
 	versionInfo, err := f.loadVersionInfoFromMarkdown(cachedPath)
 	if err == nil && versionInfo != nil {
 		fmt.Fprintf(os.Stderr, "Loaded Kubernetes version '%s' from cache\n", version)
@@ -60,7 +60,7 @@ func (f *KubernetesFetcher) FetchKubernetesVersion(version string) (*KubernetesV
 	req.Header.Set("User-Agent", "open-context-mcp-server")
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
-	resp, err := f.client.Do(req)
+	resp, err := f.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Kubernetes release: %w", err)
 	}
@@ -217,7 +217,7 @@ func (f *KubernetesFetcher) saveVersionInfoAsMarkdown(filePath string, info *Kub
 }
 
 func (f *KubernetesFetcher) loadVersionInfoFromMarkdown(filePath string) (*KubernetesVersionInfo, error) {
-	expired, err := f.cache.IsExpired(filePath)
+	expired, err := f.getCache().IsExpired(filePath)
 	if err != nil || expired {
 		return nil, fmt.Errorf("file not found or expired")
 	}
