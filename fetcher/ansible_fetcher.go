@@ -83,10 +83,10 @@ func (f *AnsibleFetcher) FetchAnsibleVersion(version string) (*AnsibleVersionInf
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Ansible release: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Ansible version %s not found", version)
+		return nil, fmt.Errorf("ansible version %s not found", version)
 	}
 
 	if resp.StatusCode != http.StatusOK {

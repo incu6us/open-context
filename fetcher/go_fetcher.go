@@ -311,13 +311,13 @@ func (f *GoFetcher) extractDescription(doc *html.Node, pkgPath string) string {
 	content.WriteString("```\n\n")
 
 	content.WriteString("## Documentation\n\n")
-	content.WriteString(fmt.Sprintf("For detailed documentation, examples, and API reference, visit:\n\n"))
+	content.WriteString("For detailed documentation, examples, and API reference, visit:\n\n")
 	content.WriteString(fmt.Sprintf("- [pkg.go.dev/%s](%s/%s)\n", pkgPath, pkgGoDevBaseURL, pkgPath))
 	content.WriteString(fmt.Sprintf("- [Go Standard Library Documentation](https://golang.org/pkg/%s/)\n\n", pkgPath))
 
 	// Add common usage note
 	content.WriteString("## Usage\n\n")
-	content.WriteString(fmt.Sprintf("This package is part of the Go standard library. "))
+	content.WriteString("This package is part of the Go standard library. ")
 	content.WriteString("Check the official documentation for the most up-to-date information, ")
 	content.WriteString("type definitions, functions, and examples.\n")
 
@@ -355,7 +355,7 @@ func writeJSON(path string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
@@ -741,7 +741,7 @@ func (f *GoFetcher) extractList(n *html.Node, content *strings.Builder) {
 		if c.Type == html.ElementNode && c.Data == "li" {
 			text := strings.TrimSpace(getText(c))
 			if text != "" {
-				content.WriteString(fmt.Sprintf("- %s\n", text))
+				fmt.Fprintf(content, "- %s\n", text)
 			}
 		}
 	}

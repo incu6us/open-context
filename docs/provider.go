@@ -87,9 +87,13 @@ func (p *Provider) loadDocumentation() error {
 			}
 		} else {
 			// Default metadata if file doesn't exist
+			displayName := docName
+			if len(docName) > 0 {
+				displayName = strings.ToUpper(docName[:1]) + docName[1:]
+			}
 			documentation = Documentation{
 				Name:        docName,
-				DisplayName: strings.Title(docName),
+				DisplayName: displayName,
 				Description: fmt.Sprintf("Documentation for %s", docName),
 			}
 		}

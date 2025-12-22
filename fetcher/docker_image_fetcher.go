@@ -133,14 +133,14 @@ func (f *DockerImageFetcher) fetchTagInfo(namespace, repository, tag string) (*D
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Docker image tag: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Docker image tag %s/%s:%s not found", namespace, repository, tag)
+		return nil, fmt.Errorf("docker image tag %s/%s:%s not found", namespace, repository, tag)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Docker Hub API returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("docker Hub API returned status %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -195,7 +195,7 @@ func (f *DockerImageFetcher) fetchAvailableTags(namespace, repository string, li
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch tags: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Docker Hub API returned status %d", resp.StatusCode)

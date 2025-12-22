@@ -65,7 +65,9 @@ func (m *Manager) Load(filePath string, v interface{}) (bool, error) {
 		// Cache is expired, remove it
 		if m.ttl > 0 {
 			fmt.Printf("Cache expired (TTL: %v), removing: %s\n", m.ttl, filepath.Base(filePath))
-			os.Remove(filePath)
+			if err := os.Remove(filePath); err != nil {
+				fmt.Printf("Warning: failed to remove expired cache file: %v\n", err)
+			}
 		}
 		return false, nil
 	}
