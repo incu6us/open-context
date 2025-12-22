@@ -300,7 +300,8 @@ setup_claude_mcp() {
             [yY]|[yY][eE][sS])
                 echo ""
                 print_info "Setting up MCP configuration for Claude..."
-                print_info "To see all configured MCPs, run: claude mcp list"
+                print_info "To see all configured MCPs, run: \n
+                claude mcp list \n"
 
                 # Run claude mcp add with --scope user flag and capture output
                 OUTPUT=$(claude mcp add --scope user open-context "$BINARY_PATH" 2>&1)
