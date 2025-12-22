@@ -230,6 +230,7 @@ func TestMCPServerToolsList(t *testing.T) {
 		"list_docs",
 		"get_go_info",
 		"get_npm_info",
+		"get_python_info",
 		"get_node_info",
 		"get_typescript_info",
 		"get_nextjs_info",
@@ -325,6 +326,15 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"packageName": "express",
 			},
 			expectInContent: []string{"express", "npm install"},
+			timeout:         30 * time.Second,
+		},
+		{
+			name:     "Python fetcher",
+			toolName: "get_python_info",
+			arguments: map[string]interface{}{
+				"packageName": "requests",
+			},
+			expectInContent: []string{"requests", "pip install"},
 			timeout:         30 * time.Second,
 		},
 		{

@@ -16,6 +16,7 @@ type MCPServer struct {
 	docProvider       *provider.Provider
 	goFetcher         *fetcher.GoFetcher
 	npmFetcher        *fetcher.NPMFetcher
+	pythonFetcher     *fetcher.PythonFetcher
 	nodeFetcher       *fetcher.NodeFetcher
 	typescriptFetcher *fetcher.TypeScriptFetcher
 	nextjsFetcher     *fetcher.NextJSFetcher
@@ -45,6 +46,7 @@ func NewMCPServer() (*MCPServer, error) {
 		docProvider:       docProvider,
 		goFetcher:         fetcher.NewGoFetcher(cacheDir),
 		npmFetcher:        fetcher.NewNPMFetcher(cacheDir),
+		pythonFetcher:     fetcher.NewPythonFetcher(cacheDir),
 		nodeFetcher:       fetcher.NewNodeFetcher(cacheDir),
 		typescriptFetcher: fetcher.NewTypeScriptFetcher(cacheDir),
 		nextjsFetcher:     fetcher.NewNextJSFetcher(cacheDir),
@@ -256,6 +258,24 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
+			Name:        "get_python_info",
+			Description: "Fetch and cache information about Python packages from PyPI (Python Package Index)",
+			InputSchema: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"packageName": map[string]interface{}{
+						"type":        "string",
+						"description": "Name of the Python package (e.g., 'requests', 'django', 'numpy')",
+					},
+					"version": map[string]interface{}{
+						"type":        "string",
+						"description": "Specific version of the package (optional, defaults to latest)",
+					},
+				},
+				"required": []string{"packageName"},
+			},
+		},
+		{
 			Name:        "get_node_info",
 			Description: "Fetch and cache information about Node.js versions from nodejs.org",
 			InputSchema: map[string]interface{}{
@@ -441,6 +461,8 @@ func (s *MCPServer) handleToolCall(req Request) Response {
 		result, err = s.getGoInfo(params.Arguments)
 	case "get_npm_info":
 		result, err = s.getNPMInfo(params.Arguments)
+	case "get_python_info":
+		result, err = s.getPythonInfo(params.Arguments)
 	case "get_node_info":
 		result, err = s.getNodeInfo(params.Arguments)
 	case "get_typescript_info":
@@ -607,6 +629,25 @@ func (s *MCPServer) getNPMInfo(args map[string]interface{}) (string, error) {
 	pkgInfo, err := s.npmFetcher.FetchPackageInfo(packageName, version)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch npm package info: %w", err)
+	}
+
+	return pkgInfo.Content, nil
+}
+
+func (s *MCPServer) getPythonInfo(args map[string]interface{}) (string, error) {
+	packageName, ok := args["packageName"].(string)
+	if !ok || packageName == "" {
+		return "", fmt.Errorf("packageName parameter is required")
+	}
+
+	version := ""
+	if v, ok := args["version"].(string); ok {
+		version = v
+	}
+
+	pkgInfo, err := s.pythonFetcher.FetchPackageInfo(packageName, version)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch Python package info: %w", err)
 	}
 
 	return pkgInfo.Content, nil
