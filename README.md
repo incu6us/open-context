@@ -9,12 +9,13 @@ Open Context fetches and caches documentation from official sources, making it i
 - **Go**: Standard library docs, third-party packages, version release notes
 - **JavaScript/TypeScript**: npm packages, Node.js, React, Next.js versions
 - **Python**: PyPI packages with installation instructions and package metadata
+- **Rust**: Crates.io packages with version info and documentation links
 - **DevOps Tools**: Docker, Kubernetes, Helm, Terraform, Ansible, Jenkins
 - **And more**: Easy to extend with any language or framework
 
 ## Key Features
 
-- **Always Up-to-Date**: Fetches from official sources (pkg.go.dev, npm registry, PyPI, GitHub releases, Docker Hub)
+- **Always Up-to-Date**: Fetches from official sources (pkg.go.dev, npm registry, PyPI, crates.io, GitHub releases, Docker Hub)
 - **Smart Caching**: Local cache with configurable TTL (default: 7 days)
 - **Fast & Lightweight**: Written in Go, starts in milliseconds
 - **Two Transport Modes**: stdio for local use, HTTP for remote servers
@@ -308,6 +309,7 @@ The server provides 15 MCP tools for fetching documentation:
 | `get_go_info` | Go versions & packages | Go 1.21, github.com/gin-gonic/gin |
 | `get_npm_info` | npm packages | express, react |
 | `get_python_info` | Python packages (PyPI) | requests, django, numpy |
+| `get_rust_info` | Rust crates (crates.io) | serde, tokio, actix-web |
 | `get_node_info` | Node.js versions | 20.0.0, 18.17.0 |
 | `get_typescript_info` | TypeScript versions | 5.0.0, 4.9.5 |
 | `get_react_info` | React versions | 18.0.0, 17.0.2 |
@@ -486,6 +488,16 @@ Fetch Python package information from PyPI.
 - `version` (optional): Specific version (defaults to latest)
 
 **Source:** PyPI (Python Package Index)
+
+### get_rust_info
+
+Fetch Rust crate information from crates.io.
+
+**Parameters:**
+- `crateName` (required): Crate name (e.g., "serde", "tokio", "actix-web")
+- `version` (optional): Specific version (defaults to latest)
+
+**Source:** crates.io
 
 ### get_node_info
 

@@ -17,6 +17,7 @@ type MCPServer struct {
 	goFetcher         *fetcher.GoFetcher
 	npmFetcher        *fetcher.NPMFetcher
 	pythonFetcher     *fetcher.PythonFetcher
+	rustFetcher       *fetcher.RustFetcher
 	nodeFetcher       *fetcher.NodeFetcher
 	typescriptFetcher *fetcher.TypeScriptFetcher
 	nextjsFetcher     *fetcher.NextJSFetcher
@@ -47,6 +48,7 @@ func NewMCPServer() (*MCPServer, error) {
 		goFetcher:         fetcher.NewGoFetcher(cacheDir),
 		npmFetcher:        fetcher.NewNPMFetcher(cacheDir),
 		pythonFetcher:     fetcher.NewPythonFetcher(cacheDir),
+		rustFetcher:       fetcher.NewRustFetcher(cacheDir),
 		nodeFetcher:       fetcher.NewNodeFetcher(cacheDir),
 		typescriptFetcher: fetcher.NewTypeScriptFetcher(cacheDir),
 		nextjsFetcher:     fetcher.NewNextJSFetcher(cacheDir),
@@ -276,6 +278,24 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
+			Name:        "get_rust_info",
+			Description: "Fetch and cache information about Rust crates from crates.io",
+			InputSchema: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"crateName": map[string]interface{}{
+						"type":        "string",
+						"description": "Name of the Rust crate (e.g., 'serde', 'tokio', 'actix-web')",
+					},
+					"version": map[string]interface{}{
+						"type":        "string",
+						"description": "Specific version of the crate (optional, defaults to latest)",
+					},
+				},
+				"required": []string{"crateName"},
+			},
+		},
+		{
 			Name:        "get_node_info",
 			Description: "Fetch and cache information about Node.js versions from nodejs.org",
 			InputSchema: map[string]interface{}{
@@ -463,6 +483,8 @@ func (s *MCPServer) handleToolCall(req Request) Response {
 		result, err = s.getNPMInfo(params.Arguments)
 	case "get_python_info":
 		result, err = s.getPythonInfo(params.Arguments)
+	case "get_rust_info":
+		result, err = s.getRustInfo(params.Arguments)
 	case "get_node_info":
 		result, err = s.getNodeInfo(params.Arguments)
 	case "get_typescript_info":
@@ -651,6 +673,25 @@ func (s *MCPServer) getPythonInfo(args map[string]interface{}) (string, error) {
 	}
 
 	return pkgInfo.Content, nil
+}
+
+func (s *MCPServer) getRustInfo(args map[string]interface{}) (string, error) {
+	crateName, ok := args["crateName"].(string)
+	if !ok || crateName == "" {
+		return "", fmt.Errorf("crateName parameter is required")
+	}
+
+	version := ""
+	if v, ok := args["version"].(string); ok {
+		version = v
+	}
+
+	crateInfo, err := s.rustFetcher.FetchCrateInfo(crateName, version)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch Rust crate info: %w", err)
+	}
+
+	return crateInfo.Content, nil
 }
 
 func (s *MCPServer) getNodeInfo(args map[string]interface{}) (string, error) {
