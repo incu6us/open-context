@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
 	"github.com/incu6us/open-context/cache"
 	"github.com/incu6us/open-context/config"
@@ -72,7 +72,7 @@ func (f *NodeFetcher) FetchNodeVersion(version string) (*NodeVersionInfo, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Node.js version list: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("nodejs.org returned status %d", resp.StatusCode)
@@ -99,7 +99,7 @@ func (f *NodeFetcher) FetchNodeVersion(version string) (*NodeVersionInfo, error)
 	}
 
 	if versionData == nil {
-		return nil, fmt.Errorf("Node.js version %s not found", version)
+		return nil, fmt.Errorf("node.js version %s not found", version)
 	}
 
 	// Extract version information

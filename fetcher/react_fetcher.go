@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
 	"github.com/incu6us/open-context/cache"
 	"github.com/incu6us/open-context/config"
@@ -83,10 +83,10 @@ func (f *ReactFetcher) FetchReactVersion(version string) (*ReactVersionInfo, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch React release: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("React version %s not found", version)
+		return nil, fmt.Errorf("react version %s not found", version)
 	}
 
 	if resp.StatusCode != http.StatusOK {

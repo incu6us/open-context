@@ -422,7 +422,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				}
 			}
 
-			cmd.Wait()
+			_ = cmd.Wait()
 			t.Logf("✓ %s works correctly", tc.name)
 		})
 	}
@@ -497,7 +497,7 @@ func TestMCPServerErrorHandling(t *testing.T) {
 			// Send request
 			requestJSON, _ := json.Marshal(tc.request)
 			_, _ = stdin.Write(append(requestJSON, '\n'))
-			stdin.Close()
+			_ = stdin.Close()
 
 			// Read response
 			decoder := json.NewDecoder(stdout)
@@ -521,7 +521,7 @@ func TestMCPServerErrorHandling(t *testing.T) {
 				t.Logf("✓ Correctly returned error: %s", errorMsg)
 			}
 
-			cmd.Wait()
+			_ = cmd.Wait()
 		})
 	}
 }
@@ -558,15 +558,15 @@ func TestMCPServerCacheCreation(t *testing.T) {
 	}
 
 	requestJSON, _ := json.Marshal(request)
-	stdin.Write(append(requestJSON, '\n'))
-	stdin.Close()
+	_, _ = stdin.Write(append(requestJSON, '\n'))
+	_ = stdin.Close()
 
 	// Read response
 	decoder := json.NewDecoder(stdout)
 	var response map[string]interface{}
 	_ = decoder.Decode(&response)
 
-	cmd.Wait()
+	_ = cmd.Wait()
 
 	// Verify cache directory was created
 	cacheDir := filepath.Join(tempDir, ".open-context", "cache")
@@ -652,8 +652,8 @@ func TestMCPServerFullWorkflow(t *testing.T) {
 		t.Logf("✓ Request %d completed successfully", i+1)
 	}
 
-	stdin.Close()
-	cmd.Wait()
+	_ = stdin.Close()
+	_ = cmd.Wait()
 
 	t.Log("✓ Full MCP workflow completed successfully")
 }

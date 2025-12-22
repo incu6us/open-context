@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"golang.org/x/net/html"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
 	"github.com/incu6us/open-context/cache"
 	"github.com/incu6us/open-context/config"
@@ -495,7 +495,7 @@ func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch library info: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code %d for %s", resp.StatusCode, importPath)
@@ -839,7 +839,7 @@ func (f *GoFetcher) queryProxyLatest(importPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("status %d", resp.StatusCode)

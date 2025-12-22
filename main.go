@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/urfave/cli/v3"
+	cli "github.com/urfave/cli/v3"
 
 	"github.com/incu6us/open-context/config"
 	"github.com/incu6us/open-context/server"

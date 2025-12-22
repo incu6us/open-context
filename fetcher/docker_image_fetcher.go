@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
 	"github.com/incu6us/open-context/cache"
 	"github.com/incu6us/open-context/config"
