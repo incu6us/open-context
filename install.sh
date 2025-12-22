@@ -261,12 +261,19 @@ setup_claude_mcp() {
                 echo ""
                 print_info "Setting up MCP configuration for Claude..."
 
-                # Run claude mcp add
-                if claude mcp add open-context "$BINARY_PATH" 2>&1; then
+                # Run claude mcp add and capture output
+                OUTPUT=$(claude mcp add open-context "$BINARY_PATH" 2>&1)
+                EXIT_CODE=$?
+
+                if [ $EXIT_CODE -eq 0 ]; then
                     print_success "MCP server configured successfully for Claude!"
                     print_info "You can now use 'open-context' tools in Claude"
+                elif echo "$OUTPUT" | grep -q "already exists"; then
+                    print_info "MCP server 'open-context' is already configured"
+                    print_info "The binary path has been updated to: $BINARY_PATH"
                 else
                     print_error "Failed to configure MCP server for Claude"
+                    echo "$OUTPUT"
                     print_info "You can manually configure it later using:"
                     echo "    claude mcp add open-context $BINARY_PATH"
                 fi
