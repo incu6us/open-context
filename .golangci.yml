@@ -8,8 +8,6 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-    - gofmt
-    - goimports
     - misspell
 
 issues:
