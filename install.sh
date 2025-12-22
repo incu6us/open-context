@@ -12,7 +12,7 @@ REPO_OWNER="incu6us"
 REPO_NAME="open-context"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}"
 BINARY_NAME="open-context"
-INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 CONFIG_DIR="$HOME/.open-context"
 
 echo "========================================"
@@ -137,7 +137,14 @@ download_and_install() {
     print_info "Downloading from: $DOWNLOAD_URL"
 
     # Create install directory if it doesn't exist
-    mkdir -p "$INSTALL_DIR"
+    if [ ! -d "$INSTALL_DIR" ]; then
+        if [ -w "$(dirname "$INSTALL_DIR")" ] 2>/dev/null || mkdir -p "$INSTALL_DIR" 2>/dev/null; then
+            print_info "Created installation directory: $INSTALL_DIR"
+        else
+            print_info "Creating installation directory requires sudo access"
+            sudo mkdir -p "$INSTALL_DIR"
+        fi
+    fi
 
     # Create temporary directory
     TMP_DIR=$(mktemp -d)
@@ -158,7 +165,12 @@ download_and_install() {
 
     # Move to install directory
     BINARY_PATH="$INSTALL_DIR/$BINARY_FILE"
-    mv "$TMP_FILE" "$BINARY_PATH"
+    if [ -w "$INSTALL_DIR" ] 2>/dev/null; then
+        mv "$TMP_FILE" "$BINARY_PATH"
+    else
+        print_info "Installing to $INSTALL_DIR requires sudo access"
+        sudo mv "$TMP_FILE" "$BINARY_PATH"
+    fi
 
     # Clean up
     rm -rf "$TMP_DIR"
