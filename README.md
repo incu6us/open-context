@@ -118,6 +118,12 @@ In your conversation with Claude, just type:
 use open-context for go
 ```
 
+or
+
+```
+create dockerfile using latest alpine image. use open-context
+```
+
 Claude will automatically fetch and use the documentation to answer your questions!
 
 ---
