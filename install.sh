@@ -232,6 +232,53 @@ verify_installation() {
     fi
 }
 
+# Setup Claude MCP integration
+setup_claude_mcp() {
+    # Check if claude CLI is installed
+    if ! command -v claude &> /dev/null; then
+        print_info "Claude CLI not found - skipping MCP setup"
+        return 0
+    fi
+
+    print_success "Claude CLI detected!"
+    echo ""
+
+    # Prompt user for setup
+    echo -n "Do you want to configure Open Context as an MCP server for Claude? (y/N): "
+    read -r response
+
+    case "$response" in
+        [yY]|[yY][eE][sS])
+            echo ""
+            print_info "Setting up MCP configuration for Claude..."
+
+            # Determine binary path
+            if [ "$OS" = "windows" ]; then
+                BINARY_PATH="$INSTALL_DIR/${BINARY_NAME}.exe"
+            else
+                BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
+            fi
+
+            # Run claude mcp add
+            if claude mcp add open-context "$BINARY_PATH" 2>&1; then
+                print_success "MCP server configured successfully for Claude!"
+                print_info "You can now use 'open-context' tools in Claude"
+            else
+                print_error "Failed to configure MCP server for Claude"
+                print_info "You can manually configure it later using:"
+                echo "    claude mcp add open-context $BINARY_PATH"
+            fi
+            ;;
+        *)
+            print_info "Skipping Claude MCP setup"
+            print_info "You can configure it later using:"
+            echo "    claude mcp add open-context $BINARY_PATH"
+            ;;
+    esac
+
+    echo ""
+}
+
 # Print usage instructions
 print_usage() {
     echo ""
@@ -269,6 +316,10 @@ main() {
             create_config_dir
             create_default_config
             check_path
+
+            # Offer Claude MCP setup even if already installed
+            setup_claude_mcp
+
             echo ""
             print_success "No action needed - already running latest version"
             exit 0
@@ -285,6 +336,9 @@ main() {
     # Verify
     verify_installation
     check_path
+
+    # Setup Claude MCP if available
+    setup_claude_mcp
 
     # Done
     print_usage
