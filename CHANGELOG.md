@@ -1,3 +1,11 @@
+## [1.2.0](https://github.com/incu6us/open-context/compare/v1.1.1...v1.2.0) (2025-12-22)
+
+
+### Features
+
+* add Claude MCP integration setup ([638855e](https://github.com/incu6us/open-context/commit/638855e99aaf0a45a10fe7df3ccdd760813898bb))
+* **install:** add Claude MCP integration ([61e5560](https://github.com/incu6us/open-context/commit/61e5560af4e4759453c4fd6a5ec16f44734a72ae))
+
 ## [1.1.1](https://github.com/incu6us/open-context/compare/v1.1.0...v1.1.1) (2025-12-22)
 
 
