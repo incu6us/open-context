@@ -243,38 +243,46 @@ setup_claude_mcp() {
     print_success "Claude CLI detected!"
     echo ""
 
-    # Prompt user for setup
-    echo -n "Do you want to configure Open Context as an MCP server for Claude? (y/N): "
-    read -r response
+    # Determine binary path
+    if [ "$OS" = "windows" ]; then
+        BINARY_PATH="$INSTALL_DIR/${BINARY_NAME}.exe"
+    else
+        BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
+    fi
 
-    case "$response" in
-        [yY]|[yY][eE][sS])
-            echo ""
-            print_info "Setting up MCP configuration for Claude..."
+    # Check if running in interactive mode
+    if [ -t 0 ]; then
+        # Interactive mode - prompt user
+        echo -n "Do you want to configure Open Context as an MCP server for Claude? (y/N): "
+        read -r response </dev/tty
 
-            # Determine binary path
-            if [ "$OS" = "windows" ]; then
-                BINARY_PATH="$INSTALL_DIR/${BINARY_NAME}.exe"
-            else
-                BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
-            fi
+        case "$response" in
+            [yY]|[yY][eE][sS])
+                echo ""
+                print_info "Setting up MCP configuration for Claude..."
 
-            # Run claude mcp add
-            if claude mcp add open-context "$BINARY_PATH" 2>&1; then
-                print_success "MCP server configured successfully for Claude!"
-                print_info "You can now use 'open-context' tools in Claude"
-            else
-                print_error "Failed to configure MCP server for Claude"
-                print_info "You can manually configure it later using:"
+                # Run claude mcp add
+                if claude mcp add open-context "$BINARY_PATH" 2>&1; then
+                    print_success "MCP server configured successfully for Claude!"
+                    print_info "You can now use 'open-context' tools in Claude"
+                else
+                    print_error "Failed to configure MCP server for Claude"
+                    print_info "You can manually configure it later using:"
+                    echo "    claude mcp add open-context $BINARY_PATH"
+                fi
+                ;;
+            *)
+                print_info "Skipping Claude MCP setup"
+                print_info "You can configure it later using:"
                 echo "    claude mcp add open-context $BINARY_PATH"
-            fi
-            ;;
-        *)
-            print_info "Skipping Claude MCP setup"
-            print_info "You can configure it later using:"
-            echo "    claude mcp add open-context $BINARY_PATH"
-            ;;
-    esac
+                ;;
+        esac
+    else
+        # Non-interactive mode (piped script)
+        print_info "Running in non-interactive mode - skipping Claude MCP setup"
+        print_info "To configure Claude MCP server, run:"
+        echo "    claude mcp add open-context $BINARY_PATH"
+    fi
 
     echo ""
 }
