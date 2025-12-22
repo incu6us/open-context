@@ -14,15 +14,38 @@ An MCP (Model Context Protocol) server that provides up-to-date documentation fo
 
 ## Installation
 
+### Quick Install (Recommended)
+
+Install directly from GitHub using the installation script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/incu6us/open-context/master/install.sh | bash
+```
+
+Or download and run manually:
+
+```bash
+wget https://raw.githubusercontent.com/incu6us/open-context/master/install.sh
+chmod +x install.sh
+./install.sh
+```
+
+The installation script will:
+- Check Go prerequisites (requires Go 1.23 or higher)
+- Install the latest version using `go install`
+- Create configuration directory (`~/.open-context/`)
+- Generate default configuration file
+- Verify the installation
+
 ### Prerequisites
 
-- Go 1.21 or higher
+- Go 1.23 or higher
 
-### Quick Setup
+### Manual Setup
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/incu6us/open-context
 cd open-context
 
 # Build everything and fetch Go documentation
@@ -176,7 +199,7 @@ Claude will automatically activate the documentation and use the tools to answer
 
 ## Available Tools
 
-The server provides four MCP tools:
+The server provides 15 MCP tools for accessing documentation and version information:
 
 ### 1. search_docs
 
@@ -238,6 +261,51 @@ Get information about github.com/spf13/cobra version v1.8.0
 - Returns markdown-formatted documentation
 
 See [GO_VERSION_LIBRARY_FEATURE.md](GO_VERSION_LIBRARY_FEATURE.md) for detailed documentation.
+
+### 5-15. Additional Version Fetchers
+
+The following tools fetch version information from official sources:
+
+**5. get_npm_info** - Fetch npm package information
+- `packageName` (required): npm package name (e.g., "express", "react")
+
+**6. get_node_info** - Fetch Node.js version information
+- `version` (required): Node.js version (e.g., "20.0.0", "18.17.0")
+
+**7. get_typescript_info** - Fetch TypeScript version information
+- `version` (required): TypeScript version (e.g., "5.0.0", "4.9.5")
+
+**8. get_react_info** - Fetch React version information
+- `version` (required): React version (e.g., "18.0.0", "17.0.2")
+
+**9. get_nextjs_info** - Fetch Next.js version information
+- `version` (required): Next.js version (e.g., "14.0.0", "13.5.0")
+
+**10. get_ansible_info** - Fetch Ansible version information
+- `version` (required): Ansible version (e.g., "2.15.0", "2.14.0")
+
+**11. get_terraform_info** - Fetch Terraform version information
+- `version` (required): Terraform version (e.g., "1.6.0", "1.5.7")
+
+**12. get_jenkins_info** - Fetch Jenkins version information
+- `version` (required): Jenkins version (e.g., "2.420", "2.401.3")
+
+**13. get_kubernetes_info** - Fetch Kubernetes version information
+- `version` (required): Kubernetes version (e.g., "1.28.0", "1.27.5")
+
+**14. get_helm_info** - Fetch Helm version information
+- `version` (required): Helm version (e.g., "3.13.0", "3.12.3")
+
+**15. get_docker_image** - Fetch Docker image information from Docker Hub
+- `image` (required): Docker image name (e.g., "golang", "node", "nginx", "myuser/myapp")
+- `tag` (required): Docker image tag (e.g., "1.23.4-bookworm", "latest", "20-alpine")
+
+**Features:**
+- Fetches from official sources (GitHub releases, Docker Hub, npm registry)
+- Shows available versions and tags
+- Provides usage examples and installation instructions
+- Automatically caches results locally
+- Returns markdown-formatted documentation
 
 ## Available Prompts
 
