@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/incu6us/open-context/compare/v1.1.0...v1.1.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* release improvements ([d867708](https://github.com/incu6us/open-context/commit/d8677082eec43abfdf55973e0a5a855364201a9e))
+* release improvements ([7c90ffb](https://github.com/incu6us/open-context/commit/7c90ffb52a7fa12c6de4ab9ef2a049efebebba6e))
+
 ## [1.1.0](https://github.com/incu6us/open-context/compare/v1.0.0...v1.1.0) (2025-12-22)
 
 
