@@ -184,7 +184,7 @@ func TestMCPServerToolsList(t *testing.T) {
 	}
 
 	requestJSON, _ := json.Marshal(request)
-	_ = stdin.Write(append(requestJSON, '\n'))
+	_, _ = stdin.Write(append(requestJSON, '\n'))
 	_ = stdin.Close()
 
 	// Read response
@@ -369,11 +369,11 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				}
 
 				requestJSON, _ := json.Marshal(request)
-				_ = stdin.Write(append(requestJSON, '\n'))
+				_, _ = stdin.Write(append(requestJSON, '\n'))
 				_ = stdin.Close()
 
 				// Read stderr in background
-				go func() { _ = io.Copy(io.Discard, stderr) }()
+				go func() { _, _ = io.Copy(io.Discard, stderr) }()
 
 				// Read response
 				decoder := json.NewDecoder(stdout)
@@ -492,11 +492,11 @@ func TestMCPServerErrorHandling(t *testing.T) {
 			}
 
 			// Read stderr in background
-			go func() { _ = io.Copy(io.Discard, stderr) }()
+			go func() { _, _ = io.Copy(io.Discard, stderr) }()
 
 			// Send request
 			requestJSON, _ := json.Marshal(tc.request)
-			_ = stdin.Write(append(requestJSON, '\n'))
+			_, _ = stdin.Write(append(requestJSON, '\n'))
 			stdin.Close()
 
 			// Read response
@@ -542,7 +542,7 @@ func TestMCPServerCacheCreation(t *testing.T) {
 	}
 
 	// Read stderr in background
-	go func() { _ = io.Copy(io.Discard, stderr) }()
+	go func() { _, _ = io.Copy(io.Discard, stderr) }()
 
 	// Send request to fetch something that will be cached
 	request := map[string]interface{}{
