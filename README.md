@@ -138,13 +138,6 @@ The installation script automates everything:
 curl -fsSL https://raw.githubusercontent.com/incu6us/open-context/master/install.sh | bash
 ```
 
-What it does:
-- ✓ Checks Go version (requires 1.23+)
-- ✓ Installs via `go install`
-- ✓ Creates `~/.open-context/` directory
-- ✓ Generates default config file
-- ✓ Verifies installation
-
 ### Manual Installation
 
 ```bash
