@@ -23,6 +23,24 @@ func main() {
 				Aliases: []string{"cc"},
 				Usage:   "Clear all cached data and exit",
 			},
+			&cli.StringFlag{
+				Name:    "transport",
+				Aliases: []string{"t"},
+				Usage:   "Transport mode: 'stdio' or 'http'",
+				Value:   "stdio",
+			},
+			&cli.StringFlag{
+				Name:    "host",
+				Aliases: []string{"H"},
+				Usage:   "Host address for HTTP transport (e.g., '0.0.0.0' or 'localhost')",
+				Value:   "localhost",
+			},
+			&cli.IntFlag{
+				Name:    "port",
+				Aliases: []string{"p"},
+				Usage:   "Port for HTTP transport",
+				Value:   9011,
+			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			// Check if clear-cache flag is set
@@ -30,8 +48,13 @@ func main() {
 				return clearCache()
 			}
 
-			// Default action - run the MCP server
-			return runServer()
+			// Get transport mode
+			transport := cmd.String("transport")
+			host := cmd.String("host")
+			port := cmd.Int("port")
+
+			// Run the MCP server with specified transport
+			return runServer(transport, host, port)
 		},
 	}
 
@@ -40,13 +63,26 @@ func main() {
 	}
 }
 
-func runServer() error {
+func runServer(transport, host string, port int) error {
 	mcpServer, err := server.NewMCPServer()
 	if err != nil {
 		return err
 	}
 
-	return mcpServer.Serve(os.Stdin, os.Stdout, os.Stderr)
+	switch transport {
+	case "stdio":
+		log.Println("Starting MCP server with stdio transport")
+		return mcpServer.Serve(os.Stdin, os.Stdout, os.Stderr)
+
+	case "http":
+		addr := fmt.Sprintf("%s:%d", host, port)
+		log.Printf("Starting MCP server with HTTP transport on %s", addr)
+		httpServer := server.NewHTTPServer(mcpServer)
+		return httpServer.ServeHTTP(addr)
+
+	default:
+		return fmt.Errorf("invalid transport mode: %s (must be 'stdio' or 'http')", transport)
+	}
 }
 
 func clearCache() error {

@@ -115,11 +115,37 @@ Open Context includes a CLI built with **urfave/cli v3.6.1** (latest version).
 
 #### Running the server
 
-The server uses stdio transport for MCP communication:
+The server supports two transport modes:
+
+**1. stdio transport (default)**
+
+Uses standard input/output for MCP communication. This is the default mode used by most MCP clients like Claude Desktop and Cursor:
 
 ```bash
 ./open-context
+# or explicitly specify stdio transport
+./open-context --transport stdio
 ```
+
+**2. HTTP transport**
+
+Runs as an HTTP server with REST API and Server-Sent Events (SSE) support. This mode allows installation via `claude mcp add`:
+
+```bash
+# Start HTTP server on default port (9011)
+./open-context --transport http
+
+# Specify custom host and port
+./open-context --transport http --host 0.0.0.0 --port 3000
+
+# Short flags
+./open-context -t http -H localhost -p 8081
+```
+
+HTTP endpoints:
+- `GET /health` - Health check endpoint
+- `POST /message` - MCP JSON-RPC messages
+- `GET /sse` - Server-Sent Events stream
 
 #### Managing cache
 
@@ -181,10 +207,32 @@ Go to Cursor Settings > Tools & Integrations > MCP Servers, and add:
 
 #### Claude Code
 
+**Option 1: stdio transport (local binary)**
+
 Add to your MCP configuration:
 
 ```bash
 claude-code mcp add open-context /path/to/open-context
+```
+
+**Option 2: HTTP transport (recommended for remote servers)**
+
+First, start the server in HTTP mode:
+
+```bash
+./open-context --transport http --host 0.0.0.0 --port 9011
+```
+
+Then install via Claude CLI:
+
+```bash
+claude mcp add --transport http open-context http://localhost:9011
+```
+
+For remote servers, use the server's public IP or domain:
+
+```bash
+claude mcp add --transport http open-context http://your-server.com:9011
 ```
 
 ## Quick Start with Prompts
