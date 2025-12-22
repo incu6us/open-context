@@ -43,7 +43,6 @@ linters:
     - revive
     - staticcheck
     - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
