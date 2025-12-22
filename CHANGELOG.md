@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/incu6us/open-context/compare/v1.3.0...v1.3.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* add portable timeout and improve MCP setup ([2239242](https://github.com/incu6us/open-context/commit/22392426a658b65909d7289f9962f6939fa480bc))
+* install.sh ([9aac6b9](https://github.com/incu6us/open-context/commit/9aac6b96c9793dfe82586f85ca7429497793894e))
+* install.sh ([07d396c](https://github.com/incu6us/open-context/commit/07d396c57c9bc62b9b35b51ab11cc6b039084867))
+
 ## [1.3.0](https://github.com/incu6us/open-context/compare/v1.2.0...v1.3.0) (2025-12-22)
 
 
