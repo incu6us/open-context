@@ -25,6 +25,7 @@ type MCPServer struct {
 	jenkinsFetcher    *fetcher.JenkinsFetcher
 	kubernetesFetcher *fetcher.KubernetesFetcher
 	helmFetcher       *fetcher.HelmFetcher
+	dockerFetcher     *fetcher.DockerImageFetcher
 }
 
 func NewMCPServer() (*MCPServer, error) {
@@ -53,6 +54,7 @@ func NewMCPServer() (*MCPServer, error) {
 		jenkinsFetcher:    fetcher.NewJenkinsFetcher(cacheDir),
 		kubernetesFetcher: fetcher.NewKubernetesFetcher(cacheDir),
 		helmFetcher:       fetcher.NewHelmFetcher(cacheDir),
+		dockerFetcher:     fetcher.NewDockerImageFetcher(cacheDir),
 	}, nil
 }
 
@@ -379,6 +381,24 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 				"required": []string{"version"},
 			},
 		},
+		{
+			Name:        "get_docker_image",
+			Description: "Fetch and cache information about Docker images from Docker Hub, including available tags and image details",
+			InputSchema: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"image": map[string]interface{}{
+						"type":        "string",
+						"description": "Docker image name (e.g., 'golang', 'node', 'nginx', 'myuser/myapp')",
+					},
+					"tag": map[string]interface{}{
+						"type":        "string",
+						"description": "Docker image tag (e.g., '1.23.4-bookworm', 'latest', '20-alpine')",
+					},
+				},
+				"required": []string{"image", "tag"},
+			},
+		},
 	}
 
 	return Response{
@@ -439,6 +459,8 @@ func (s *MCPServer) handleToolCall(req Request) Response {
 		result, err = s.getKubernetesInfo(params.Arguments)
 	case "get_helm_info":
 		result, err = s.getHelmInfo(params.Arguments)
+	case "get_docker_image":
+		result, err = s.getDockerImage(params.Arguments)
 	default:
 		return Response{
 			JSONRPC: "2.0",
@@ -714,6 +736,25 @@ func (s *MCPServer) getHelmInfo(args map[string]interface{}) (string, error) {
 	}
 
 	return versionInfo.Content, nil
+}
+
+func (s *MCPServer) getDockerImage(args map[string]interface{}) (string, error) {
+	image, ok := args["image"].(string)
+	if !ok || image == "" {
+		return "", fmt.Errorf("image parameter is required")
+	}
+
+	tag, ok := args["tag"].(string)
+	if !ok || tag == "" {
+		return "", fmt.Errorf("tag parameter is required")
+	}
+
+	imageInfo, err := s.dockerFetcher.FetchDockerImage(image, tag)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch Docker image info: %w", err)
+	}
+
+	return imageInfo.Content, nil
 }
 
 func (s *MCPServer) handlePromptsList(req Request) Response {

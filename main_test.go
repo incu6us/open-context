@@ -220,6 +220,7 @@ func TestMCPServerToolsList(t *testing.T) {
 		"get_jenkins_info",
 		"get_kubernetes_info",
 		"get_helm_info",
+		"get_docker_image",
 	}
 
 	toolNames := make(map[string]bool)
@@ -323,6 +324,16 @@ func TestMCPServerAllFetchers(t *testing.T) {
 				"version": "14.0.0",
 			},
 			expectInContent: []string{"Next.js", "14.0", "npm install"},
+			timeout:         30 * time.Second,
+		},
+		{
+			name:     "Docker image fetcher",
+			toolName: "get_docker_image",
+			arguments: map[string]interface{}{
+				"image": "golang",
+				"tag":   "1.25.5-bookworm",
+			},
+			expectInContent: []string{"Docker Image:", "golang:1.25.5-bookworm", "docker pull"},
 			timeout:         30 * time.Second,
 		},
 	}
