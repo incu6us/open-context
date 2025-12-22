@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	cli "github.com/urfave/cli/v3"
 
@@ -12,11 +13,19 @@ import (
 	"github.com/incu6us/open-context/server"
 )
 
+// Project build specific vars, set during build time via ldflags
+var (
+	Tag       string
+	Commit    string
+	SourceURL string
+	GoVersion string
+)
+
 func main() {
 	cmd := &cli.Command{
 		Name:    "open-context",
 		Usage:   "MCP server providing documentation for programming languages and frameworks",
-		Version: "0.1.0",
+		Version: getVersion(),
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "clear-cache",
@@ -106,4 +115,12 @@ func clearCache() error {
 
 	fmt.Println("✓ Cache cleared successfully!")
 	return nil
+}
+
+// getVersion returns the version string, trimmed of "v" prefix
+func getVersion() string {
+	if Tag != "" {
+		return strings.TrimPrefix(Tag, "v")
+	}
+	return "dev"
 }
