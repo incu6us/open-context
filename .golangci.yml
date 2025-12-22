@@ -10,24 +10,44 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 3
+  funlen:
+    lines: -1
+    statements: 30
+  lll:
+    line-length: 160
 
 linters:
   disable-all: true
   enable:
+    - bodyclose
+    - dogsled
+    - dupl
     - errcheck
+    - errorlint
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - goprintffuncname
     - gosimple
     - govet
     - ineffassign
-    - staticcheck
-    - unused
-    - gofmt
-    - goimports
+    - lll
     - misspell
-    - unconvert
+    - nakedret
+    - noctx
+    - nolintlint
+    - revive
+    - staticcheck
+    - stylecheck
     - typecheck
-    - gocyclo
-    - dupl
-    - goconst
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
 
 issues:
   exclude-use-default: false
@@ -35,5 +55,9 @@ issues:
   max-same-issues: 0
 
 run:
+  concurrency: 4
   timeout: 5m
-  tests: true
+  issues-exit-code: 2
+  tests: false
+  modules-download-mode: readonly
+  allow-parallel-runners: true
