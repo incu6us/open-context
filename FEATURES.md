@@ -22,13 +22,13 @@ Full implementation of the Model Context Protocol (MCP) for seamless integration
 
 ### 2. Automatic Documentation Fetching
 
-**Go Standard Library Fetcher**
+**On-Demand Documentation Fetching**
 
-Automatically downloads and parses documentation from pkg.go.dev:
+Documentation is fetched automatically from official sources when requested via MCP tools:
 
 ```bash
-# Fetch ~100 most common Go packages
-make fetch-go
+# No pre-fetching needed!
+# Use MCP tools like get_go_info to fetch on-demand
 ```
 
 **Features:**
@@ -216,22 +216,25 @@ These serve as examples and fallback if data directory doesn't exist.
 
 ### 1. Quick Setup
 ```bash
-make setup  # Build + fetch Go docs
+make setup  # Build the server
 ```
 
-### 2. Update Documentation
+### 2. Clear Cache (optional)
 ```bash
-make fetch-go  # Re-fetch Go stdlib
+./open-context --clear-cache  # Or: make clean-cache
 ```
 
-### 3. Search from AI
+### 3. Fetch Documentation On-Demand
+Documentation is fetched automatically when you ask Claude:
+```
+"What's new in Go 1.21?"
+"Show me how to use github.com/gin-gonic/gin"
+"Get the latest TypeScript 5.0 features"
+```
+
+### 4. Search Existing Docs
 ```
 "Search open-context for http client in Go"
-```
-
-### 4. Get Specific Docs
-```
-"Get the net/http package documentation from open-context"
 ```
 
 ### 5. Add Custom Docs
