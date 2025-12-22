@@ -10,7 +10,6 @@ open-context
 
 # Output of the go coverage tool
 *.out
-coverage.txt
 
 # IDE
 .idea/
