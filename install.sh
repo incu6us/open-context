@@ -8,7 +8,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/incu6us/open-context"
+REPO_OWNER="incu6us"
+REPO_NAME="open-context"
+REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}"
 BINARY_NAME="open-context"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 CONFIG_DIR="$HOME/.open-context"
@@ -31,39 +33,137 @@ print_info() {
     echo -e "${YELLOW}ℹ${NC} $1"
 }
 
-# Check if Go is installed
-check_go() {
-    if ! command -v go &> /dev/null; then
-        print_error "Go is not installed. Please install Go 1.23 or later from https://golang.org/dl/"
+# Detect OS and architecture
+detect_platform() {
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    ARCH=$(uname -m)
+
+    case "$OS" in
+        linux*)
+            OS="linux"
+            ;;
+        darwin*)
+            OS="darwin"
+            ;;
+        msys*|mingw*|cygwin*)
+            OS="windows"
+            ;;
+        *)
+            print_error "Unsupported operating system: $OS"
+            exit 1
+            ;;
+    esac
+
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        armv7l)
+            ARCH="armv7"
+            ;;
+        *)
+            print_error "Unsupported architecture: $ARCH"
+            exit 1
+            ;;
+    esac
+
+    PLATFORM="${OS}_${ARCH}"
+    print_info "Detected platform: $PLATFORM"
+}
+
+# Get latest release version from GitHub API
+get_latest_version() {
+    print_info "Fetching latest release version..."
+
+    LATEST_VERSION=$(curl -sL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+    if [ -z "$LATEST_VERSION" ]; then
+        print_error "Failed to fetch latest version from GitHub"
         exit 1
     fi
 
-    GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-    print_success "Go $GO_VERSION is installed"
+    print_success "Latest version: $LATEST_VERSION"
 }
 
-# Check Go version
-check_go_version() {
-    REQUIRED_VERSION="1.23"
-    GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+# Get current installed version
+get_installed_version() {
+    BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
 
-    if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$GO_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
-        print_error "Go version $GO_VERSION is too old. Please install Go $REQUIRED_VERSION or later"
-        exit 1
+    if [ -f "$BINARY_PATH" ]; then
+        INSTALLED_VERSION=$("$BINARY_PATH" --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+
+        if [ -n "$INSTALLED_VERSION" ]; then
+            print_info "Installed version: $INSTALLED_VERSION"
+            return 0
+        fi
     fi
+
+    INSTALLED_VERSION=""
+    print_info "No existing installation found"
+    return 1
 }
 
-# Install from source
-install_from_source() {
-    print_info "Installing open-context from source..."
-
-    # Use go install to download and install
-    if go install github.com/incu6us/open-context@latest; then
-        print_success "Successfully installed open-context"
+# Compare versions
+compare_versions() {
+    if [ "$INSTALLED_VERSION" = "$LATEST_VERSION" ]; then
+        print_success "Already running the latest version ($LATEST_VERSION)"
+        return 0
     else
-        print_error "Failed to install from source"
+        print_info "Update available: $INSTALLED_VERSION -> $LATEST_VERSION"
+        return 1
+    fi
+}
+
+# Download and install binary
+download_and_install() {
+    # Determine binary name based on OS
+    if [ "$OS" = "windows" ]; then
+        BINARY_FILE="${BINARY_NAME}.exe"
+    else
+        BINARY_FILE="$BINARY_NAME"
+    fi
+
+    # Construct download URL
+    ASSET_NAME="${BINARY_NAME}_${PLATFORM}"
+    if [ "$OS" = "windows" ]; then
+        ASSET_NAME="${ASSET_NAME}.exe"
+    fi
+
+    DOWNLOAD_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${LATEST_VERSION}/${ASSET_NAME}"
+
+    print_info "Downloading from: $DOWNLOAD_URL"
+
+    # Create install directory if it doesn't exist
+    mkdir -p "$INSTALL_DIR"
+
+    # Create temporary directory
+    TMP_DIR=$(mktemp -d)
+    TMP_FILE="$TMP_DIR/$BINARY_FILE"
+
+    # Download binary
+    if curl -fsSL "$DOWNLOAD_URL" -o "$TMP_FILE"; then
+        print_success "Downloaded successfully"
+    else
+        print_error "Failed to download binary from $DOWNLOAD_URL"
+        print_info "Please check if the release exists at: ${REPO_URL}/releases"
+        rm -rf "$TMP_DIR"
         exit 1
     fi
+
+    # Make binary executable
+    chmod +x "$TMP_FILE"
+
+    # Move to install directory
+    BINARY_PATH="$INSTALL_DIR/$BINARY_FILE"
+    mv "$TMP_FILE" "$BINARY_PATH"
+
+    # Clean up
+    rm -rf "$TMP_DIR"
+
+    print_success "Installed to: $BINARY_PATH"
 }
 
 # Create config directory
@@ -96,23 +196,24 @@ EOF
 
 # Check if binary is in PATH
 check_path() {
-    GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
-
-    if [[ ":$PATH:" != *":$GOBIN:"* ]]; then
-        print_info "Go bin directory is not in your PATH"
+    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+        print_info "Installation directory is not in your PATH"
         print_info "Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
         echo ""
-        echo "    export PATH=\"\$PATH:$GOBIN\""
+        echo "    export PATH=\"\$PATH:$INSTALL_DIR\""
         echo ""
     else
-        print_success "Go bin directory is in PATH"
+        print_success "Installation directory is in PATH"
     fi
 }
 
 # Verify installation
 verify_installation() {
-    GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
-    BINARY_PATH="$GOBIN/$BINARY_NAME"
+    if [ "$OS" = "windows" ]; then
+        BINARY_PATH="$INSTALL_DIR/${BINARY_NAME}.exe"
+    else
+        BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
+    fi
 
     if [ -f "$BINARY_PATH" ]; then
         print_success "Binary installed at: $BINARY_PATH"
@@ -140,27 +241,10 @@ print_usage() {
     echo ""
     echo "Usage:"
     echo "  $BINARY_NAME --help              # Show help"
-    echo "  $BINARY_NAME --version           # Show version"
-    echo "  $BINARY_NAME                     # Start MCP server"
-    echo "  $BINARY_NAME --clear-cache       # Clear cache"
     echo ""
     echo "Configuration:"
     echo "  Config file: $CONFIG_DIR/config.yaml"
     echo "  Cache dir:   $CONFIG_DIR/cache/"
-    echo ""
-    echo "Available Tools:"
-    echo "  - Go package/module/library documentation"
-    echo "  - npm package information"
-    echo "  - Node.js version information"
-    echo "  - TypeScript version information"
-    echo "  - React version information"
-    echo "  - Next.js version information"
-    echo "  - Ansible version information"
-    echo "  - Terraform version information"
-    echo "  - Jenkins version information"
-    echo "  - Kubernetes version information"
-    echo "  - Helm version information"
-    echo "  - Docker image information"
     echo ""
     echo "For more information, visit: $REPO_URL"
     echo ""
@@ -171,14 +255,30 @@ main() {
     echo "Starting installation..."
     echo ""
 
-    # Check prerequisites
-    check_go
-    check_go_version
+    # Detect platform
+    detect_platform
 
-    # Install
-    install_from_source
+    # Get versions
+    get_latest_version
+    get_installed_version || true
 
-    # Setup
+    # Check if update is needed
+    if [ -n "$INSTALLED_VERSION" ]; then
+        if compare_versions; then
+            # Already up to date, but ensure config exists
+            create_config_dir
+            create_default_config
+            check_path
+            echo ""
+            print_success "No action needed - already running latest version"
+            exit 0
+        fi
+    fi
+
+    # Download and install
+    download_and_install
+
+    # Setup configuration
     create_config_dir
     create_default_config
 
