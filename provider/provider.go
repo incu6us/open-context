@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-type Provider struct {
-	documentations map[string]*Documentation
-	cacheDir       string
-}
-
 type Documentation struct {
 	Name        string            `json:"name"`
 	DisplayName string            `json:"displayName"`
@@ -35,6 +30,11 @@ type SearchResult struct {
 	Description   string  `json:"description"`
 	Documentation string  `json:"documentation"`
 	Score         float64 `json:"score"`
+}
+
+type Provider struct {
+	documentations map[string]*Documentation
+	cacheDir       string
 }
 
 func NewProvider(cacheDir string) (*Provider, error) {

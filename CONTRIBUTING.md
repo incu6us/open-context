@@ -90,7 +90,7 @@ Choose keywords that developers would naturally search for:
 
 ### Prerequisites
 
-- Go 1.21 or higher
+- Go 1.23 or higher
 - Git
 
 ### Building
@@ -113,16 +113,30 @@ go test ./...
 
 ```
 open-context/
-├── main.go              # Entry point
-├── server/              # MCP server implementation
-│   └── server.go
-├── docs/                # Documentation provider
-│   └── provider.go
-├── data/                # Documentation content
+├── main.go              # Entry point & CLI
+├── server/
+│   ├── server.go        # MCP protocol & tool handlers
+│   └── http.go          # HTTP transport
+├── docs/
+│   └── provider.go      # Documentation search & retrieval
+├── fetcher/             # External source fetchers
+│   ├── base_fetcher.go  # Common fetcher functionality
+│   ├── go_fetcher.go    # Go packages (pkg.go.dev)
+│   ├── npm_fetcher.go   # npm packages
+│   ├── python_fetcher.go # PyPI packages
+│   ├── rust_fetcher.go  # crates.io packages
+│   ├── docker_fetcher.go # Docker Hub images
+│   └── ...              # Other tool fetchers
+├── cache/
+│   └── cache.go         # Cache management
+├── data/                # Local documentation storage
 │   └── <language>/
 │       ├── metadata.json
 │       └── topics/
-└── test.sh             # Integration tests
+├── .github/
+│   └── workflows/
+│       └── ci.yml       # CI/CD pipeline
+└── test.sh              # Integration tests
 ```
 
 ## Code Style
@@ -133,23 +147,104 @@ open-context/
 - Keep functions focused and small
 - Use meaningful variable names
 
-## Commit Messages
+## Conventional Commits
 
-- Use present tense ("Add feature" not "Added feature")
-- Keep first line under 50 characters
-- Add detailed description if needed
-- Reference issues: "Fixes #123"
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for all changes. This enables automated versioning and changelog generation.
 
-Example:
+### Commit Message Format
+
 ```
-Add TypeScript generics documentation
+<type>[optional scope]: <description>
 
-- Created topics/generics.json with comprehensive examples
-- Added keywords for better searchability
-- Included utility types and constraints
+[optional body]
 
-Fixes #42
+[optional footer(s)]
 ```
+
+### Types
+
+- **feat**: A new feature (triggers MINOR version bump)
+- **fix**: A bug fix (triggers PATCH version bump)
+- **docs**: Documentation only changes
+- **style**: Changes that don't affect code meaning (formatting, whitespace)
+- **refactor**: Code change that neither fixes a bug nor adds a feature
+- **perf**: Performance improvements
+- **test**: Adding or updating tests
+- **build**: Changes to build system or dependencies
+- **ci**: Changes to CI configuration files and scripts
+- **chore**: Other changes that don't modify src or test files
+
+### Breaking Changes
+
+Add `!` after type/scope or `BREAKING CHANGE:` in footer for breaking changes (triggers MAJOR version bump):
+
+```
+feat!: remove support for Go 1.21
+
+BREAKING CHANGE: minimum Go version is now 1.23
+```
+
+### Examples
+
+**New feature:**
+```
+feat(fetcher): add Python package fetcher
+
+- Fetch package info from PyPI
+- Cache results with TTL
+- Include installation instructions
+
+Closes #45
+```
+
+**Bug fix:**
+```
+fix(cache): handle expired cache entries correctly
+
+Previously, expired cache entries were not properly cleaned up,
+leading to stale data being returned.
+```
+
+**Documentation:**
+```
+docs: update installation instructions for Windows
+
+Add detailed steps for Windows users including PATH configuration.
+```
+
+**Breaking change:**
+```
+feat(server)!: change HTTP transport default port to 9011
+
+BREAKING CHANGE: The default HTTP port changed from 8080 to 9011.
+Update your configurations accordingly.
+```
+
+### Scopes
+
+Common scopes in this project:
+- `fetcher`: Changes to fetcher implementations
+- `server`: MCP server changes
+- `cache`: Cache management
+- `docs`: Documentation provider
+- `cli`: Command-line interface
+- `ci`: CI/CD pipeline
+
+### Guidelines
+
+- Keep the subject line under 72 characters
+- Use imperative mood ("add" not "adds" or "added")
+- Don't capitalize the first letter of the description
+- Don't end the subject line with a period
+- Reference issues and PRs in the footer
+
+### Automated Releases
+
+When commits are merged to `master` branch, the CI pipeline will:
+1. Parse conventional commits since the last release
+2. Determine the next version based on commit types
+3. Create a git tag in semver format (e.g., `v0.1.0`)
+4. Generate a GitHub release with changelog
 
 ## Questions?
 

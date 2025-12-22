@@ -602,14 +602,10 @@ Get Docker image golang:1.23-alpine
 - [x] Go package fetching from pkg.go.dev
 - [x] HTTP transport for remote servers
 - [x] Version fetchers for major tools
-- [ ] Python packages (PyPI)
-- [ ] Rust crates (crates.io)
-- [ ] Fetch all Go packages (currently ~100 most common)
+- [x] Python packages (PyPI)
+- [x] Rust crates (crates.io)
 - [ ] Version-specific documentation
-- [ ] Code examples extraction
-- [ ] Incremental cache updates
 - [ ] Web UI for browsing docs
-- [ ] Parallel fetching optimization
 
 ## Contributing
 
