@@ -111,8 +111,6 @@ Changes take effect on the next run of open-context.
 
 ### CLI Usage
 
-Open Context includes a CLI built with **urfave/cli v3.6.1** (latest version).
-
 #### Running the server
 
 The server supports two transport modes:
