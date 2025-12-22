@@ -146,7 +146,7 @@ func (f *GoFetcher) getStdLibPackages() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -228,7 +228,7 @@ func (f *GoFetcher) fetchPackageDoc(pkgPath string) (*PackageDoc, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -417,7 +417,7 @@ func (f *GoFetcher) FetchGoVersion(version string) (*GoVersionInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Go %s info: %w", version, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code %d for Go %s", resp.StatusCode, version)

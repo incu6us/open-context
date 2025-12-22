@@ -83,10 +83,10 @@ func (f *HelmFetcher) FetchHelmVersion(version string) (*HelmVersionInfo, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Helm release: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Helm version %s not found", version)
+		return nil, fmt.Errorf("helm version %s not found", version)
 	}
 
 	if resp.StatusCode != http.StatusOK {

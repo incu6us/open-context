@@ -198,7 +198,7 @@ func (f *DockerImageFetcher) fetchAvailableTags(namespace, repository string, li
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Docker Hub API returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("docker Hub API returned status %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
