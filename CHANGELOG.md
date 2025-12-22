@@ -1,3 +1,22 @@
+## [1.3.0](https://github.com/incu6us/open-context/compare/v1.2.0...v1.3.0) (2025-12-22)
+
+
+### Features
+
+* **install:** use /usr/local/bin as default installation directory ([a432c21](https://github.com/incu6us/open-context/commit/a432c21bc047afc08a38a2c5db277defb8757dee))
+
+
+### Bug Fixes
+
+* add portable timeout and improve MCP setup ([dc0ce19](https://github.com/incu6us/open-context/commit/dc0ce19999723cc7dabc39f2d324636b4e468a12))
+* **install:** improve MCP server already exists handling ([0c821c3](https://github.com/incu6us/open-context/commit/0c821c31ae340cef3111f192ce945b628fff411b))
+* **install:** support both interactive and non-interactive modes ([04953b9](https://github.com/incu6us/open-context/commit/04953b9b4b77da8cf8adcd4ee8a8e09df7767903))
+
+
+### Performance Improvements
+
+* **ci:** optimize test execution and suppress npm warnings ([a6f940d](https://github.com/incu6us/open-context/commit/a6f940d5a5d26260552543fe17140c11c75c3597))
+
 ## [1.2.0](https://github.com/incu6us/open-context/compare/v1.1.1...v1.2.0) (2025-12-22)
 
 
