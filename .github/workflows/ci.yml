@@ -41,7 +41,7 @@ jobs:
 
     - name: Run tests (Unix)
       if: runner.os != 'Windows'
-      run: go test -v -timeout 600s -race -coverprofile=coverage.out -covermode=atomic ./...
+      run: go test -v -timeout 300s -race -coverprofile=coverage.out -covermode=atomic ./...
 
     - name: Run tests (Windows)
       if: runner.os == 'Windows'

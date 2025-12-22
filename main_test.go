@@ -7,10 +7,19 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 )
+
+// getBinaryName returns the correct binary name for the current platform
+func getBinaryName(name string) string {
+	if runtime.GOOS == "windows" {
+		return name + ".exe"
+	}
+	return name
+}
 
 // TestMainHelpCommand tests the --help flag
 func TestMainHelpCommand(t *testing.T) {
@@ -75,7 +84,8 @@ func TestMainClearCacheCommand(t *testing.T) {
 	cmd := exec.Command("go", "run", ".", "--clear-cache")
 	// Isolate GOMODCACHE to prevent permission issues during cleanup
 	gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-	cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+	// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+	cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Failed to run --clear-cache: %v\nOutput: %s", err, string(output))
@@ -94,15 +104,17 @@ func TestMCPServerInitialize(t *testing.T) {
 	tempDir := t.TempDir()
 
 	// Build the binary first for faster tests
-	buildCmd := exec.Command("go", "build", "-o", filepath.Join(tempDir, "open-context"))
+	binaryPath := filepath.Join(tempDir, getBinaryName("open-context"))
+	buildCmd := exec.Command("go", "build", "-o", binaryPath)
 	if err := buildCmd.Run(); err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
-	cmd := exec.Command(filepath.Join(tempDir, "open-context"))
+	cmd := exec.Command(binaryPath)
 	// Isolate GOMODCACHE to prevent permission issues during cleanup
 	gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-	cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+	// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+	cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -173,7 +185,8 @@ func TestMCPServerToolsList(t *testing.T) {
 	cmd := exec.Command("go", "run", ".")
 	// Isolate GOMODCACHE to prevent permission issues during cleanup
 	gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-	cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+	// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+	cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 	stdin, _ := cmd.StdinPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -349,7 +362,8 @@ func TestMCPServerAllFetchers(t *testing.T) {
 			cmd := exec.Command("go", "run", ".")
 			// Isolate GOMODCACHE to prevent permission issues during cleanup
 			gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-			cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+			// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+			cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 			stdin, _ := cmd.StdinPipe()
 			stdout, _ := cmd.StdoutPipe()
@@ -502,7 +516,8 @@ func TestMCPServerErrorHandling(t *testing.T) {
 			cmd := exec.Command("go", "run", ".")
 			// Isolate GOMODCACHE to prevent permission issues during cleanup
 			gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-			cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+			// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+			cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 			stdin, _ := cmd.StdinPipe()
 			stdout, _ := cmd.StdoutPipe()
@@ -554,7 +569,8 @@ func TestMCPServerCacheCreation(t *testing.T) {
 	cmd := exec.Command("go", "run", ".")
 	// Isolate GOMODCACHE to prevent permission issues during cleanup
 	gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-	cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+	// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+	cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 	stdin, _ := cmd.StdinPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -617,7 +633,8 @@ func TestMCPServerFullWorkflow(t *testing.T) {
 	cmd := exec.Command("go", "run", ".")
 	// Isolate GOMODCACHE to prevent permission issues during cleanup
 	gomodcache := filepath.Join(os.TempDir(), "open-context-test-gomodcache")
-	cmd.Env = append(os.Environ(), "HOME="+tempDir, "GOMODCACHE="+gomodcache)
+	// Set both HOME and USERPROFILE for cross-platform compatibility (Windows uses USERPROFILE)
+	cmd.Env = append(os.Environ(), "HOME="+tempDir, "USERPROFILE="+tempDir, "GOMODCACHE="+gomodcache)
 
 	stdin, _ := cmd.StdinPipe()
 	stdout, _ := cmd.StdoutPipe()
