@@ -300,23 +300,13 @@ setup_claude_mcp() {
             [yY]|[yY][eE][sS])
                 echo ""
                 print_info "Setting up MCP configuration for Claude..."
-                print_info "This may take a moment while verifying the server..."
+                print_info "To see all configured MCPs, run: claude mcp list"
 
-                # Run claude mcp add with --scope user flag and capture output using portable timeout
-                TMP_OUTPUT=$(mktemp)
-                run_with_timeout 30 "claude mcp add --scope user open-context '$BINARY_PATH' > '$TMP_OUTPUT' 2>&1"
+                # Run claude mcp add with --scope user flag and capture output
+                OUTPUT=$(claude mcp add --scope user open-context "$BINARY_PATH" 2>&1)
                 EXIT_CODE=$?
-                OUTPUT=$(cat "$TMP_OUTPUT")
-                rm -f "$TMP_OUTPUT"
 
-                if [ $EXIT_CODE -eq 124 ]; then
-                    print_error "MCP server configuration timed out after 30 seconds"
-                    print_info "The server may still be configured, but verification failed"
-                    print_info "You can verify manually using:"
-                    echo "    claude mcp list"
-                    print_info "Or try configuring again with:"
-                    echo "    claude mcp add --scope user open-context $BINARY_PATH"
-                elif [ $EXIT_CODE -eq 0 ]; then
+                if [ $EXIT_CODE -eq 0 ]; then
                     print_success "MCP server configured for Claude (user scope)!"
                     print_info "Configuration stored in: ~/.claude/settings.json"
                     print_info "Binary path: $BINARY_PATH"
