@@ -244,6 +244,33 @@ verify_installation() {
     fi
 }
 
+# Portable timeout function
+run_with_timeout() {
+    local timeout_duration=$1
+    shift
+    local cmd="$@"
+
+    # Run command in background
+    eval "$cmd" &
+    local cmd_pid=$!
+
+    # Wait for command with timeout
+    local count=0
+    while kill -0 $cmd_pid 2>/dev/null; do
+        if [ $count -ge $timeout_duration ]; then
+            kill $cmd_pid 2>/dev/null
+            wait $cmd_pid 2>/dev/null
+            return 124  # timeout exit code
+        fi
+        sleep 1
+        count=$((count + 1))
+    done
+
+    # Get actual exit code
+    wait $cmd_pid
+    return $?
+}
+
 # Setup Claude MCP integration
 setup_claude_mcp() {
     # Check if claude CLI is installed
@@ -265,6 +292,7 @@ setup_claude_mcp() {
     # Check if running in interactive mode
     if [ -t 0 ]; then
         # Interactive mode - prompt user
+        print_info "MCP configuration will be stored in: ~/.claude/settings.json"
         echo -n "Do you want to configure Open Context as an MCP server for Claude? (y/N): "
         read -r response </dev/tty
 
@@ -272,35 +300,65 @@ setup_claude_mcp() {
             [yY]|[yY][eE][sS])
                 echo ""
                 print_info "Setting up MCP configuration for Claude..."
+                print_info "This may take a moment while verifying the server..."
 
-                # Run claude mcp add and capture output
-                OUTPUT=$(claude mcp add open-context "$BINARY_PATH" 2>&1)
+                # Run claude mcp add with --scope user flag and capture output using portable timeout
+                TMP_OUTPUT=$(mktemp)
+                run_with_timeout 30 "claude mcp add --scope user open-context '$BINARY_PATH' > '$TMP_OUTPUT' 2>&1"
                 EXIT_CODE=$?
+                OUTPUT=$(cat "$TMP_OUTPUT")
+                rm -f "$TMP_OUTPUT"
 
-                if [ $EXIT_CODE -eq 0 ]; then
-                    print_success "MCP server configured successfully for Claude!"
+                if [ $EXIT_CODE -eq 124 ]; then
+                    print_error "MCP server configuration timed out after 30 seconds"
+                    print_info "The server may still be configured, but verification failed"
+                    print_info "You can verify manually using:"
+                    echo "    claude mcp list"
+                    print_info "Or try configuring again with:"
+                    echo "    claude mcp add --scope user open-context $BINARY_PATH"
+                elif [ $EXIT_CODE -eq 0 ]; then
+                    print_success "MCP server configured for Claude (user scope)!"
+                    print_info "Configuration stored in: ~/.claude/settings.json"
+                    print_info "Binary path: $BINARY_PATH"
                     print_info "You can now use 'open-context' tools in Claude"
+                    echo ""
+                    print_info "All configured MCP servers:"
+                    MCP_LIST=$(claude mcp list 2>&1 | grep -v "warn:" | grep -v "Checking" | grep -v "https://" | grep ":")
+                    if [ -n "$MCP_LIST" ]; then
+                        echo "$MCP_LIST" | sed 's/^/  /'
+                    else
+                        echo "  No MCP servers configured"
+                    fi
                 elif echo "$OUTPUT" | grep -q "already exists"; then
                     print_info "MCP server 'open-context' is already configured"
+                    print_info "Configuration location: ~/.claude/settings.json"
                     print_info "The binary path has been updated to: $BINARY_PATH"
+                    echo ""
+                    print_info "All configured MCP servers:"
+                    MCP_LIST=$(claude mcp list 2>&1 | grep -v "warn:" | grep -v "Checking" | grep -v "https://" | grep ":")
+                    if [ -n "$MCP_LIST" ]; then
+                        echo "$MCP_LIST" | sed 's/^/  /'
+                    else
+                        echo "  No MCP servers configured"
+                    fi
                 else
                     print_error "Failed to configure MCP server for Claude"
                     echo "$OUTPUT"
                     print_info "You can manually configure it later using:"
-                    echo "    claude mcp add open-context $BINARY_PATH"
+                    echo "    claude mcp add --scope user open-context $BINARY_PATH"
                 fi
                 ;;
             *)
                 print_info "Skipping Claude MCP setup"
                 print_info "You can configure it later using:"
-                echo "    claude mcp add open-context $BINARY_PATH"
+                echo "    claude mcp add --scope user open-context $BINARY_PATH"
                 ;;
         esac
     else
         # Non-interactive mode (piped script)
         print_info "Running in non-interactive mode - skipping Claude MCP setup"
-        print_info "To configure Claude MCP server, run:"
-        echo "    claude mcp add open-context $BINARY_PATH"
+        print_info "To configure Claude MCP server (user scope), run:"
+        echo "    claude mcp add --scope user open-context $BINARY_PATH"
     fi
 
     echo ""
