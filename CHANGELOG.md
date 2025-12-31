@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/incu6us/open-context/compare/v1.3.1...v1.3.2) (2025-12-31)
+
+
+### Bug Fixes
+
+* prefix for tools added ([c80fb70](https://github.com/incu6us/open-context/commit/c80fb70a1c31460be14d732a0895e3d0ba119a86))
+
 ## [1.3.1](https://github.com/incu6us/open-context/compare/v1.3.0...v1.3.1) (2025-12-22)
 
 
