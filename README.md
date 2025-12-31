@@ -41,7 +41,7 @@ cd open-context
 go build -o open-context
 ```
 
-**Prerequisites**: Go 1.23 or higher
+**Prerequisites**: Go 1.25 or higher
 
 ### 2. Configure Your MCP Client
 
@@ -282,7 +282,7 @@ Show me React 18 features
 ```
 What's in Kubernetes 1.28?
 Show me Terraform 1.6 changes
-Get the golang:1.23-alpine Docker image details
+Get the golang:1.25-alpine Docker image details
 ```
 
 See [USING_PROMPTS.md](USING_PROMPTS.md) for more examples.
@@ -303,22 +303,22 @@ The server provides 15 MCP tools for fetching documentation:
 
 ### Version & Package Fetchers
 
-| Tool | What it Fetches | Example |
-|------|-----------------|---------|
-| `open-context_get_go_info` | Go versions & packages | Go 1.21, github.com/gin-gonic/gin |
-| `open-context_get_npm_info` | npm packages | express, react |
-| `open-context_get_python_info` | Python packages (PyPI) | requests, django, numpy |
-| `open-context_get_rust_info` | Rust crates (crates.io) | serde, tokio, actix-web |
-| `open-context_get_node_info` | Node.js versions | 20.0.0, 18.17.0 |
-| `open-context_get_typescript_info` | TypeScript versions | 5.0.0, 4.9.5 |
-| `open-context_get_react_info` | React versions | 18.0.0, 17.0.2 |
-| `open-context_get_nextjs_info` | Next.js versions | 14.0.0, 13.5.0 |
-| `open-context_get_ansible_info` | Ansible versions | 2.15.0 |
-| `open-context_get_terraform_info` | Terraform versions | 1.6.0 |
-| `open-context_get_jenkins_info` | Jenkins versions | 2.420 |
-| `open-context_get_kubernetes_info` | Kubernetes versions | 1.28.0 |
-| `open-context_get_helm_info` | Helm versions | 3.13.0 |
-| `open-context_get_docker_image` | Docker Hub images | golang:1.23-alpine |
+| Tool | What it Fetches | Example                                      |
+|------|-----------------|----------------------------------------------|
+| `open-context_get_go_info` | Go versions & packages | Go 1.21, github.com/gin-gonic/gin            |
+| `open-context_get_npm_info` | npm packages | express, react                               |
+| `open-context_get_python_info` | Python packages (PyPI) | requests, django, numpy                      |
+| `open-context_get_rust_info` | Rust crates (crates.io) | serde, tokio, actix-web                      |
+| `open-context_get_node_info` | Node.js versions | 20.0.0, 18.17.0                              |
+| `open-context_get_typescript_info` | TypeScript versions | 5.0.0, 4.9.5                                 |
+| `open-context_get_react_info` | React versions | 18.0.0, 17.0.2                               |
+| `open-context_get_nextjs_info` | Next.js versions | 14.0.0, 13.5.0                               |
+| `open-context_get_ansible_info` | Ansible versions | 2.15.0                                       |
+| `open-context_get_terraform_info` | Terraform versions | 1.6.0                                        |
+| `open-context_get_jenkins_info` | Jenkins versions | 2.420                                        |
+| `open-context_get_kubernetes_info` | Kubernetes versions | 1.28.0                                       |
+| `open-context_get_helm_info` | Helm versions | 3.13.0                                       |
+| `open-context_get_docker_image` | Docker Hub images | golang:1.25-alpine                           |
 | `open-context_get_github_action` | GitHub Actions | actions/checkout, docker/setup-buildx-action |
 
 **All tools automatically:**
@@ -586,11 +586,11 @@ Fetch Docker image information from Docker Hub.
 
 **Parameters:**
 - `image` (required): Image name (e.g., "golang", "nginx", "myuser/myapp")
-- `tag` (required): Image tag (e.g., "1.23-alpine", "latest")
+- `tag` (required): Image tag (e.g., "1.25-alpine", "latest")
 
 **Example:**
 ```
-Get Docker image golang:1.23-alpine
+Get Docker image golang:1.25-alpine
 ```
 
 **Source:** Docker Hub API
