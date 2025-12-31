@@ -297,29 +297,29 @@ The server provides 15 MCP tools for fetching documentation:
 
 | Tool | Description |
 |------|-------------|
-| `search_docs` | Search across all documentation |
-| `get_docs` | Get specific documentation topic |
-| `list_docs` | List all available documentation |
+| `open-context_search_docs` | Search across all documentation |
+| `open-context_get_docs` | Get specific documentation topic |
+| `open-context_list_docs` | List all available documentation |
 
 ### Version & Package Fetchers
 
 | Tool | What it Fetches | Example |
 |------|-----------------|---------|
-| `get_go_info` | Go versions & packages | Go 1.21, github.com/gin-gonic/gin |
-| `get_npm_info` | npm packages | express, react |
-| `get_python_info` | Python packages (PyPI) | requests, django, numpy |
-| `get_rust_info` | Rust crates (crates.io) | serde, tokio, actix-web |
-| `get_node_info` | Node.js versions | 20.0.0, 18.17.0 |
-| `get_typescript_info` | TypeScript versions | 5.0.0, 4.9.5 |
-| `get_react_info` | React versions | 18.0.0, 17.0.2 |
-| `get_nextjs_info` | Next.js versions | 14.0.0, 13.5.0 |
-| `get_ansible_info` | Ansible versions | 2.15.0 |
-| `get_terraform_info` | Terraform versions | 1.6.0 |
-| `get_jenkins_info` | Jenkins versions | 2.420 |
-| `get_kubernetes_info` | Kubernetes versions | 1.28.0 |
-| `get_helm_info` | Helm versions | 3.13.0 |
-| `get_docker_image` | Docker Hub images | golang:1.23-alpine |
-| `get_github_action` | GitHub Actions | actions/checkout, docker/setup-buildx-action |
+| `open-context_get_go_info` | Go versions & packages | Go 1.21, github.com/gin-gonic/gin |
+| `open-context_get_npm_info` | npm packages | express, react |
+| `open-context_get_python_info` | Python packages (PyPI) | requests, django, numpy |
+| `open-context_get_rust_info` | Rust crates (crates.io) | serde, tokio, actix-web |
+| `open-context_get_node_info` | Node.js versions | 20.0.0, 18.17.0 |
+| `open-context_get_typescript_info` | TypeScript versions | 5.0.0, 4.9.5 |
+| `open-context_get_react_info` | React versions | 18.0.0, 17.0.2 |
+| `open-context_get_nextjs_info` | Next.js versions | 14.0.0, 13.5.0 |
+| `open-context_get_ansible_info` | Ansible versions | 2.15.0 |
+| `open-context_get_terraform_info` | Terraform versions | 1.6.0 |
+| `open-context_get_jenkins_info` | Jenkins versions | 2.420 |
+| `open-context_get_kubernetes_info` | Kubernetes versions | 1.28.0 |
+| `open-context_get_helm_info` | Helm versions | 3.13.0 |
+| `open-context_get_docker_image` | Docker Hub images | golang:1.23-alpine |
+| `open-context_get_github_action` | GitHub Actions | actions/checkout, docker/setup-buildx-action |
 
 **All tools automatically:**
 - Fetch from official sources
@@ -412,7 +412,7 @@ open-context/
 
 ## Tools Reference
 
-### search_docs
+### open-context_search_docs
 
 Search for documentation topics across all languages.
 
@@ -425,7 +425,7 @@ Search for documentation topics across all languages.
 Search for "goroutines" in Go documentation
 ```
 
-### get_docs
+### open-context_get_docs
 
 Get detailed documentation for a specific topic.
 
@@ -439,7 +439,7 @@ Get detailed documentation for a specific topic.
 Get documentation for topic "basics" in Go
 ```
 
-### list_docs
+### open-context_list_docs
 
 List all available documentation languages and topics.
 
@@ -448,7 +448,7 @@ List all available documentation languages and topics.
 List all available documentation
 ```
 
-### get_go_info
+### open-context_get_go_info
 
 Fetch Go version information or package documentation.
 
@@ -470,7 +470,7 @@ Get information about github.com/spf13/cobra version v1.8.0
 
 See [GO_VERSION_LIBRARY_FEATURE.md](GO_VERSION_LIBRARY_FEATURE.md) for details.
 
-### get_npm_info
+### open-context_get_npm_info
 
 Fetch npm package information.
 
@@ -479,7 +479,7 @@ Fetch npm package information.
 
 **Source:** npm registry
 
-### get_python_info
+### open-context_get_python_info
 
 Fetch Python package information from PyPI.
 
@@ -489,7 +489,7 @@ Fetch Python package information from PyPI.
 
 **Source:** PyPI (Python Package Index)
 
-### get_rust_info
+### open-context_get_rust_info
 
 Fetch Rust crate information from crates.io.
 
@@ -499,7 +499,7 @@ Fetch Rust crate information from crates.io.
 
 **Source:** crates.io
 
-### get_node_info
+### open-context_get_node_info
 
 Fetch Node.js version information.
 
@@ -508,7 +508,7 @@ Fetch Node.js version information.
 
 **Source:** GitHub releases
 
-### get_typescript_info
+### open-context_get_typescript_info
 
 Fetch TypeScript version information.
 
@@ -517,7 +517,7 @@ Fetch TypeScript version information.
 
 **Source:** GitHub releases
 
-### get_react_info
+### open-context_get_react_info
 
 Fetch React version information.
 
@@ -526,7 +526,7 @@ Fetch React version information.
 
 **Source:** GitHub releases
 
-### get_nextjs_info
+### open-context_get_nextjs_info
 
 Fetch Next.js version information.
 
@@ -535,7 +535,7 @@ Fetch Next.js version information.
 
 **Source:** GitHub releases
 
-### get_ansible_info
+### open-context_get_ansible_info
 
 Fetch Ansible version information.
 
@@ -544,7 +544,7 @@ Fetch Ansible version information.
 
 **Source:** GitHub releases
 
-### get_terraform_info
+### open-context_get_terraform_info
 
 Fetch Terraform version information.
 
@@ -553,7 +553,7 @@ Fetch Terraform version information.
 
 **Source:** GitHub releases
 
-### get_jenkins_info
+### open-context_get_jenkins_info
 
 Fetch Jenkins version information.
 
@@ -562,7 +562,7 @@ Fetch Jenkins version information.
 
 **Source:** GitHub releases
 
-### get_kubernetes_info
+### open-context_get_kubernetes_info
 
 Fetch Kubernetes version information.
 
@@ -571,7 +571,7 @@ Fetch Kubernetes version information.
 
 **Source:** GitHub releases
 
-### get_helm_info
+### open-context_get_helm_info
 
 Fetch Helm version information.
 
@@ -580,7 +580,7 @@ Fetch Helm version information.
 
 **Source:** GitHub releases
 
-### get_docker_image
+### open-context_get_docker_image
 
 Fetch Docker image information from Docker Hub.
 
@@ -595,7 +595,7 @@ Get Docker image golang:1.23-alpine
 
 **Source:** Docker Hub API
 
-### get_github_action
+### open-context_get_github_action
 
 Fetch GitHub Action information from GitHub API.
 

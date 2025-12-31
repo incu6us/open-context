@@ -59,7 +59,7 @@ func (p *Provider) loadDocumentation() error {
 
 	// Check if data directory exists
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "Info: Cache directory is empty. Use 'get_go_info' tool for on-demand fetching.\n")
+		fmt.Fprintf(os.Stderr, "Info: Cache directory is empty. Use 'open-context_get_go_info' tool for on-demand fetching.\n")
 		return nil
 	}
 
@@ -132,7 +132,7 @@ func (p *Provider) loadDocumentation() error {
 
 	// Info message if no documentations were loaded
 	if len(p.documentations) == 0 {
-		fmt.Fprintf(os.Stderr, "Info: No documentation loaded. Use 'get_go_info' tool for on-demand fetching.\n")
+		fmt.Fprintf(os.Stderr, "Info: No documentation loaded. Use 'open-context_get_go_info' tool for on-demand fetching.\n")
 	}
 
 	return nil

@@ -15,10 +15,10 @@ Full implementation of the Model Context Protocol (MCP) for seamless integration
 - Any MCP-compatible client
 
 **Four MCP Tools:**
-- `search_docs`: Intelligent search across all documentation
-- `get_docs`: Retrieve specific documentation topics
-- `list_docs`: Browse available documentation and topics
-- `get_go_info`: Fetch Go version info and library documentation from official sources (go.dev, pkg.go.dev)
+- `open-context_search_docs`: Intelligent search across all documentation
+- `open-context_get_docs`: Retrieve specific documentation topics
+- `open-context_list_docs`: Browse available documentation and topics
+- `open-context_get_go_info`: Fetch Go version info and library documentation from official sources (go.dev, pkg.go.dev)
 
 ### 2. Automatic Documentation Fetching
 

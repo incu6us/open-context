@@ -58,7 +58,7 @@ Claude: I will help you using the **go** documentation...
 
 You: What's new in Go 1.25?
 
-Claude: [Uses get_go_info tool to fetch Go 1.25 release notes]
+Claude: [Uses open-context_get_go_info tool to fetch Go 1.25 release notes]
 ```
 
 ```
@@ -72,7 +72,7 @@ Claude: Available documentation:
 
 You: Tell me about TypeScript generics
 
-Claude: [Uses search_docs and get_docs tools]
+Claude: [Uses open-context_search_docs and open-context_get_docs tools]
 ```
 
 ## What Happens When You Use the Prompt
@@ -83,7 +83,7 @@ When you invoke the prompt without specifying documentation, Claude receives:
 
 - List of all available documentation
 - Their topics and descriptions
-- Information about the `get_go_info` tool for on-demand fetching
+- Information about the `open-context_get_go_info` tool for on-demand fetching
 - Instructions on how to specify documentation
 
 ### With Specific Documentation (e.g., "go")
@@ -92,10 +92,10 @@ When you specify a documentation type, Claude receives:
 
 - Confirmation of which documentation is active
 - List of available tools:
-  - `search_docs` - Search for topics
-  - `get_docs` - Get specific content
-  - `list_docs` - List all documentation
-  - `get_go_info` - Fetch Go versions/libraries (for Go documentation)
+  - `open-context_search_docs` - Search for topics
+  - `open-context_get_docs` - Get specific content
+  - `open-context_list_docs` - List all documentation
+  - `open-context_get_go_info` - Fetch Go versions/libraries (for Go documentation)
 - Specific examples for that documentation type
 - Instructions to use these tools automatically
 
@@ -120,7 +120,7 @@ Claude: I will help you using the go documentation. What would you like to know?
 
 You: What's new in Go 1.25?
 
-Claude: [Automatically uses get_go_info tool]
+Claude: [Automatically uses open-context_get_go_info tool]
 
         Let me fetch the Go 1.25 release notes for you...
 
@@ -136,7 +136,7 @@ Claude: Ready to help with Go documentation.
 
 You: Tell me about the Gin web framework
 
-Claude: [Automatically uses get_go_info tool]
+Claude: [Automatically uses open-context_get_go_info tool]
 
         [Returns library information with installation instructions, docs link, etc.]
 ```
@@ -150,8 +150,8 @@ Claude: I will help you using the typescript documentation.
 
 You: How do generics work?
 
-Claude: [Automatically uses search_docs to find "generics" topic]
-        [Uses get_docs to retrieve the content]
+Claude: [Automatically uses open-context_search_docs to find "generics" topic]
+        [Uses open-context_get_docs to retrieve the content]
 
         [Returns TypeScript generics documentation]
 ```
@@ -191,12 +191,12 @@ Claude: [Invokes use-docs prompt with typescript]
 ```
 You: Search for goroutines in the documentation
 
-Claude: [Uses search_docs tool]
+Claude: [Uses open-context_search_docs tool]
         [Returns search results]
 
 You: Get the goroutines documentation
 
-Claude: [Uses get_docs tool]
+Claude: [Uses open-context_get_docs tool]
         [Returns documentation]
 ```
 
@@ -209,8 +209,8 @@ Claude: Ready to help with Go documentation.
 
 You: Tell me about goroutines
 
-Claude: [Automatically uses search_docs]
-        [Automatically uses get_docs]
+Claude: [Automatically uses open-context_search_docs]
+        [Automatically uses open-context_get_docs]
         [Provides comprehensive answer]
 ```
 
@@ -261,7 +261,7 @@ The prompt returns a message that Claude sees as user input, making it aware of:
 
 **Problem:** The prompt shows no documentation
 
-**Solution:** Use `get_go_info` tool for on-demand fetching of Go documentation
+**Solution:** Use `open-context_get_go_info` tool for on-demand fetching of Go documentation
 
 ### "Claude doesn't use tools automatically"
 

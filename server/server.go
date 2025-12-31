@@ -175,7 +175,7 @@ func (s *MCPServer) handleInitialize(req Request) Response {
 func (s *MCPServer) handleToolsList(req Request) Response {
 	tools := []ToolInfo{
 		{
-			Name:        "search_docs",
+			Name:        "open-context_search_docs",
 			Description: "Search for documentation topics across all available documentation sources",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -193,7 +193,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_docs",
+			Name:        "open-context_get_docs",
 			Description: "Get detailed documentation for a specific topic or library",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -214,14 +214,14 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "list_docs",
+			Name:        "open-context_list_docs",
 			Description: "List all available documentation languages and their topics",
 			InputSchema: map[string]interface{}{
 				"type": "object",
 			},
 		},
 		{
-			Name:        "get_go_info",
+			Name:        "open-context_get_go_info",
 			Description: "Fetch and cache information about specific Go versions or Go libraries from official sources",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -244,7 +244,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_npm_info",
+			Name:        "open-context_get_npm_info",
 			Description: "Fetch and cache information about npm packages from the npm registry",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -262,7 +262,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_python_info",
+			Name:        "open-context_get_python_info",
 			Description: "Fetch and cache information about Python packages from PyPI (Python Package Index)",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -280,7 +280,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_rust_info",
+			Name:        "open-context_get_rust_info",
 			Description: "Fetch and cache information about Rust crates from crates.io",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -298,7 +298,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_node_info",
+			Name:        "open-context_get_node_info",
 			Description: "Fetch and cache information about Node.js versions from nodejs.org",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -312,7 +312,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_typescript_info",
+			Name:        "open-context_get_typescript_info",
 			Description: "Fetch and cache information about TypeScript versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -326,7 +326,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_nextjs_info",
+			Name:        "open-context_get_nextjs_info",
 			Description: "Fetch and cache information about Next.js versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -340,7 +340,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_react_info",
+			Name:        "open-context_get_react_info",
 			Description: "Fetch and cache information about React versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -354,7 +354,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_ansible_info",
+			Name:        "open-context_get_ansible_info",
 			Description: "Fetch and cache information about Ansible versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -368,7 +368,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_terraform_info",
+			Name:        "open-context_get_terraform_info",
 			Description: "Fetch and cache information about Terraform versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -382,7 +382,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_jenkins_info",
+			Name:        "open-context_get_jenkins_info",
 			Description: "Fetch and cache information about Jenkins versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -396,7 +396,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_kubernetes_info",
+			Name:        "open-context_get_kubernetes_info",
 			Description: "Fetch and cache information about Kubernetes versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -410,7 +410,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_helm_info",
+			Name:        "open-context_get_helm_info",
 			Description: "Fetch and cache information about Helm versions from GitHub releases",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -424,7 +424,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_docker_image",
+			Name:        "open-context_get_docker_image",
 			Description: "Fetch and cache information about Docker images from Docker Hub, including available tags and image details",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -442,7 +442,7 @@ func (s *MCPServer) handleToolsList(req Request) Response {
 			},
 		},
 		{
-			Name:        "get_github_action",
+			Name:        "open-context_get_github_action",
 			Description: "Fetch and cache information about GitHub Actions from GitHub API, including action metadata, inputs, and outputs",
 			InputSchema: map[string]interface{}{
 				"type": "object",
@@ -491,41 +491,41 @@ func (s *MCPServer) handleToolCall(req Request) Response {
 	var err error
 
 	switch params.Name {
-	case "search_docs":
+	case "open-context_search_docs":
 		result, err = s.searchDocs(params.Arguments)
-	case "get_docs":
+	case "open-context_get_docs":
 		result, err = s.getDocs(params.Arguments)
-	case "list_docs":
+	case "open-context_list_docs":
 		result, err = s.listDocs()
-	case "get_go_info":
+	case "open-context_get_go_info":
 		result, err = s.getGoInfo(params.Arguments)
-	case "get_npm_info":
+	case "open-context_get_npm_info":
 		result, err = s.getNPMInfo(params.Arguments)
-	case "get_python_info":
+	case "open-context_get_python_info":
 		result, err = s.getPythonInfo(params.Arguments)
-	case "get_rust_info":
+	case "open-context_get_rust_info":
 		result, err = s.getRustInfo(params.Arguments)
-	case "get_node_info":
+	case "open-context_get_node_info":
 		result, err = s.getNodeInfo(params.Arguments)
-	case "get_typescript_info":
+	case "open-context_get_typescript_info":
 		result, err = s.getTypeScriptInfo(params.Arguments)
-	case "get_nextjs_info":
+	case "open-context_get_nextjs_info":
 		result, err = s.getNextJSInfo(params.Arguments)
-	case "get_react_info":
+	case "open-context_get_react_info":
 		result, err = s.getReactInfo(params.Arguments)
-	case "get_ansible_info":
+	case "open-context_get_ansible_info":
 		result, err = s.getAnsibleInfo(params.Arguments)
-	case "get_terraform_info":
+	case "open-context_get_terraform_info":
 		result, err = s.getTerraformInfo(params.Arguments)
-	case "get_jenkins_info":
+	case "open-context_get_jenkins_info":
 		result, err = s.getJenkinsInfo(params.Arguments)
-	case "get_kubernetes_info":
+	case "open-context_get_kubernetes_info":
 		result, err = s.getKubernetesInfo(params.Arguments)
-	case "get_helm_info":
+	case "open-context_get_helm_info":
 		result, err = s.getHelmInfo(params.Arguments)
-	case "get_docker_image":
+	case "open-context_get_docker_image":
 		result, err = s.getDockerImage(params.Arguments)
-	case "get_github_action":
+	case "open-context_get_github_action":
 		result, err = s.getGitHubAction(params.Arguments)
 	default:
 		return Response{
@@ -958,18 +958,18 @@ func (s *MCPServer) handlePromptsGet(req Request) Response {
 			}
 			promptText += "\n"
 		}
-		promptText += "\nYou can also use the `get_go_info` tool to fetch any Go version or library documentation on demand from official sources.\n\n"
+		promptText += "\nYou can also use the `open-context_get_go_info` tool to fetch any Go version or library documentation on demand from official sources.\n\n"
 		promptText += "To use specific documentation, invoke this prompt with the documentation name (e.g., 'go' or 'typescript')."
 	} else {
 		// Provide instructions for using specific documentation
 		promptText = fmt.Sprintf("I will help you using the **%s** documentation available in the open-context server.\n\n", documentation)
 		promptText += "I have access to the following tools:\n\n"
-		promptText += "1. **search_docs** - Search for topics in the documentation\n"
-		promptText += "2. **get_docs** - Get specific documentation content\n"
-		promptText += "3. **list_docs** - List all available documentation\n"
+		promptText += "1. **open-context_search_docs** - Search for topics in the documentation\n"
+		promptText += "2. **open-context_get_docs** - Get specific documentation content\n"
+		promptText += "3. **open-context_list_docs** - List all available documentation\n"
 
 		if documentation == "go" {
-			promptText += "4. **get_go_info** - Fetch Go version release notes or library information from official sources (go.dev, pkg.go.dev)\n\n"
+			promptText += "4. **open-context_get_go_info** - Fetch Go version release notes or library information from official sources (go.dev, pkg.go.dev)\n\n"
 			promptText += "For Go-specific queries:\n"
 			promptText += "- Ask about Go versions: \"What's new in Go 1.25?\"\n"
 			promptText += "- Ask about Go libraries: \"Tell me about github.com/gin-gonic/gin\"\n"
