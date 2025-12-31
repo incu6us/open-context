@@ -282,7 +282,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 	}{
 		{
 			name:     "Terraform fetcher",
-			toolName: "get_terraform_info",
+			toolName: "open-context_get_terraform_info",
 			arguments: map[string]interface{}{
 				"version": "1.6.0",
 			},
@@ -291,7 +291,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Kubernetes fetcher",
-			toolName: "get_kubernetes_info",
+			toolName: "open-context_get_kubernetes_info",
 			arguments: map[string]interface{}{
 				"version": "1.28.0",
 			},
@@ -300,7 +300,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Helm fetcher",
-			toolName: "get_helm_info",
+			toolName: "open-context_get_helm_info",
 			arguments: map[string]interface{}{
 				"version": "3.13.0",
 			},
@@ -309,7 +309,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Ansible fetcher",
-			toolName: "get_ansible_info",
+			toolName: "open-context_get_ansible_info",
 			arguments: map[string]interface{}{
 				"version": "2.15.0",
 			},
@@ -318,7 +318,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Node.js fetcher",
-			toolName: "get_node_info",
+			toolName: "open-context_get_node_info",
 			arguments: map[string]interface{}{
 				"version": "20.0.0",
 			},
@@ -327,7 +327,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "npm fetcher",
-			toolName: "get_npm_info",
+			toolName: "open-context_get_npm_info",
 			arguments: map[string]interface{}{
 				"packageName": "express",
 			},
@@ -336,7 +336,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Python fetcher",
-			toolName: "get_python_info",
+			toolName: "open-context_get_python_info",
 			arguments: map[string]interface{}{
 				"packageName": "requests",
 			},
@@ -345,7 +345,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Rust fetcher",
-			toolName: "get_rust_info",
+			toolName: "open-context_get_rust_info",
 			arguments: map[string]interface{}{
 				"crateName": "serde",
 			},
@@ -354,7 +354,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "React fetcher",
-			toolName: "get_react_info",
+			toolName: "open-context_get_react_info",
 			arguments: map[string]interface{}{
 				"version": "18.0.0",
 			},
@@ -363,7 +363,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Next.js fetcher",
-			toolName: "get_nextjs_info",
+			toolName: "open-context_get_nextjs_info",
 			arguments: map[string]interface{}{
 				"version": "14.0.0",
 			},
@@ -372,7 +372,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "Docker image fetcher",
-			toolName: "get_docker_image",
+			toolName: "open-context_get_docker_image",
 			arguments: map[string]interface{}{
 				"image": "golang",
 				"tag":   "1.25.5-bookworm",
@@ -382,7 +382,7 @@ func TestMCPServerAllFetchers(t *testing.T) {
 		},
 		{
 			name:     "GitHub Actions fetcher",
-			toolName: "get_github_action",
+			toolName: "open-context_get_github_action",
 			arguments: map[string]interface{}{
 				"repository": "actions/checkout",
 			},
@@ -536,7 +536,7 @@ func TestMCPServerErrorHandling(t *testing.T) {
 				"id":      1,
 				"method":  "tools/call",
 				"params": map[string]interface{}{
-					"name":      "get_node_info",
+					"name":      "open-context_get_node_info",
 					"arguments": map[string]interface{}{},
 				},
 			},
@@ -623,7 +623,7 @@ func TestMCPServerCacheCreation(t *testing.T) {
 		"id":      1,
 		"method":  "tools/call",
 		"params": map[string]interface{}{
-			"name": "get_terraform_info",
+			"name": "open-context_get_terraform_info",
 			"arguments": map[string]interface{}{
 				"version": "1.6.0",
 			},
@@ -697,7 +697,7 @@ func TestMCPServerFullWorkflow(t *testing.T) {
 			"id":      3,
 			"method":  "tools/call",
 			"params": map[string]interface{}{
-				"name": "get_helm_info",
+				"name": "open-context_get_helm_info",
 				"arguments": map[string]interface{}{
 					"version": "3.13.0",
 				},

@@ -67,24 +67,24 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | ./open-conte
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | ./open-context | jq .
 ```
 
-**Expected:** 4 tools listed (search_docs, get_docs, list_docs, get_go_info)
+**Expected:** 18 tools listed (open-context_search_docs, open-context_get_docs, open-context_list_docs, open-context_get_go_info, etc.)
 
 ### 3. Search Documentation
 
 ```bash
-echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_docs","arguments":{"query":"goroutines"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"open-context_search_docs","arguments":{"query":"goroutines"}}}' | ./open-context | jq .
 ```
 
 ### 4. Get Specific Documentation
 
 ```bash
-echo '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_docs","arguments":{"id":"basics","language":"go"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"open-context_get_docs","arguments":{"id":"basics","language":"go"}}}' | ./open-context | jq .
 ```
 
 ### 5. Test Go Version Info (New Feature)
 
 ```bash
-echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.21"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.21"}}}' | ./open-context | jq .
 ```
 
 **First run:** Fetches from go.dev and caches
@@ -94,12 +94,12 @@ echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"get_go_inf
 
 **Latest version:**
 ```bash
-echo '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}' | ./open-context | jq .
 ```
 
 **Specific version:**
 ```bash
-echo '{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin","version":"v1.9.1"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin","version":"v1.9.1"}}}' | ./open-context | jq .
 ```
 
 ## Interactive Testing
@@ -132,7 +132,7 @@ echo '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 
 echo ""
 echo "3. Searching for HTTP..."
-echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_docs","arguments":{"query":"http"}}}'
+echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"open-context_search_docs","arguments":{"query":"http"}}}'
 
 # Kill server
 kill $SERVER_PID
@@ -215,12 +215,12 @@ echo "==================================="
 
 # First fetch (network)
 echo "First fetch (should fetch from network):"
-time echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null
+time echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null
 
 # Second fetch (cache)
 echo ""
 echo "Second fetch (should load from cache):"
-time echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null
+time echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null
 EOF
 
 chmod +x perf_test.sh
@@ -234,7 +234,7 @@ chmod +x perf_test.sh
 ### Invalid Version
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"99.99"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"99.99"}}}' | ./open-context | jq .
 ```
 
 **Expected:** Error response with appropriate message
@@ -242,7 +242,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_inf
 ### Invalid Library
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/nonexistent/package"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/nonexistent/package"}}}' | ./open-context | jq .
 ```
 
 **Expected:** Error response about package not found
@@ -250,7 +250,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_inf
 ### Missing Parameters
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version"}}}' | ./open-context | jq .
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version"}}}' | ./open-context | jq .
 ```
 
 **Expected:** Error about missing version parameter
@@ -358,7 +358,7 @@ Test with actual MCP client:
 cat << EOF | ./open-context
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.21"}}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.21"}}}
 EOF
 ```
 

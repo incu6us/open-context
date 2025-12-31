@@ -9,7 +9,7 @@ Quick reference for testing the MCP server manually.
 ./test.sh
 ```
 
-This will test all 8 features including the new `get_go_info` tool.
+This will test all 8 features including the new `open-context_get_go_info` tool.
 
 ## Method 2: Direct JSON-RPC Testing
 
@@ -34,17 +34,17 @@ The server will wait for JSON-RPC requests on stdin.
 
 ### Get Go Version Info
 ```json
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.21"}}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.21"}}}
 ```
 
 ### Get Library Info
 ```json
-{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}
 ```
 
 ### Get Library with Version
 ```json
-{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/spf13/cobra","version":"v1.8.0"}}}
+{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/spf13/cobra","version":"v1.8.0"}}}
 ```
 
 **Step 3: Press Ctrl+D to exit**
@@ -53,10 +53,10 @@ The server will wait for JSON-RPC requests on stdin.
 
 ```bash
 # Test Go version
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.21"}}}' | ./open-context
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.21"}}}' | ./open-context
 
 # Test library
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}' | ./open-context
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"library","importPath":"github.com/gin-gonic/gin"}}}' | ./open-context
 ```
 
 ## Method 4: Using a File
@@ -68,7 +68,7 @@ Create a test file with multiple requests:
 cat > requests.jsonl << 'EOF'
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.21"}}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.21"}}}
 EOF
 ```
 
@@ -101,13 +101,13 @@ EOF
 
 ### Test 1: Version Info (First Fetch)
 ```bash
-time (echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null)
+time (echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null)
 ```
 Should take ~1-2 seconds (fetches from go.dev)
 
 ### Test 2: Version Info (Cached)
 ```bash
-time (echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null)
+time (echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"version","version":"1.22"}}}' | ./open-context > /dev/null)
 ```
 Should be instant (<100ms - loads from cache)
 
@@ -126,17 +126,17 @@ cat data/go/versions/1.22.json | jq .
 
 ### Search Documentation
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_docs","arguments":{"query":"http"}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_search_docs","arguments":{"query":"http"}}}
 ```
 
 ### Get Documentation
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_docs","arguments":{"id":"basics","language":"go"}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_docs","arguments":{"id":"basics","language":"go"}}}
 ```
 
 ### List Documentation
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_docs","arguments":{}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_list_docs","arguments":{}}}
 ```
 
 ## Debugging
@@ -150,7 +150,7 @@ cat debug.log
 
 **Check for errors:**
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_go_info","arguments":{"type":"invalid"}}}' | ./open-context
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"open-context_get_go_info","arguments":{"type":"invalid"}}}' | ./open-context
 ```
 
 ## Expected Results
