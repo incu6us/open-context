@@ -1,3 +1,11 @@
+## [1.3.3](https://github.com/incu6us/open-context/compare/v1.3.2...v1.3.3) (2026-03-24)
+
+
+### Bug Fixes
+
+* linter ([ada3e0d](https://github.com/incu6us/open-context/commit/ada3e0d0316af71b06263dd118638dc0be0e4e03))
+* mcp capabilities ([e582e4a](https://github.com/incu6us/open-context/commit/e582e4a9f5b87b46e7a088353605c2fda6cf1328))
+
 ## [1.3.2](https://github.com/incu6us/open-context/compare/v1.3.1...v1.3.2) (2025-12-31)
 
 
