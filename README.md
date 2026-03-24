@@ -1,8 +1,6 @@
 # Open Context
 
 [![CI](https://github.com/incu6us/open-context/actions/workflows/ci.yml/badge.svg)](https://github.com/incu6us/open-context/actions/workflows/ci.yml)
-[![Release](https://github.com/incu6us/open-context/actions/workflows/release.yml/badge.svg)](https://github.com/incu6us/open-context/actions/workflows/release.yml)
-[![codecov](https://codecov.io/gh/incu6us/open-context/branch/master/graph/badge.svg)](https://codecov.io/gh/incu6us/open-context)
 [![Go Report Card](https://goreportcard.com/badge/github.com/incu6us/open-context)](https://goreportcard.com/report/github.com/incu6us/open-context)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Stars](https://img.shields.io/github/stars/incu6us/open-context)
