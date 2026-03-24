@@ -125,30 +125,30 @@ func (f *ReactFetcher) FetchReactVersion(version string) (*ReactVersionInfo, err
 func (f *ReactFetcher) buildVersionContent(info *ReactVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# React %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# React %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using npm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("npm install react@%s react-dom@%s\n", info.Version, info.Version))
+	fmt.Fprintf(&content, "npm install react@%s react-dom@%s\n", info.Version, info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using yarn\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("yarn add react@%s react-dom@%s\n", info.Version, info.Version))
+	fmt.Fprintf(&content, "yarn add react@%s react-dom@%s\n", info.Version, info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using pnpm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("pnpm add react@%s react-dom@%s\n", info.Version, info.Version))
+	fmt.Fprintf(&content, "pnpm add react@%s react-dom@%s\n", info.Version, info.Version)
 	content.WriteString("```\n\n")
 
 	if releaseNotes != "" {
@@ -168,7 +168,7 @@ func (f *ReactFetcher) buildVersionContent(info *ReactVersionInfo, releaseNotes 
 	if idx := strings.LastIndex(majorMinor, "."); idx > 0 {
 		majorMinor = majorMinor[:idx]
 	}
-	content.WriteString(fmt.Sprintf("- [React %s Release Blog Post](https://react.dev/blog)\n", majorMinor))
+	fmt.Fprintf(&content, "- [React %s Release Blog Post](https://react.dev/blog)\n", majorMinor)
 
 	return content.String()
 }
@@ -184,12 +184,12 @@ func (f *ReactFetcher) saveVersionInfoAsMarkdown(filePath string, info *ReactVer
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

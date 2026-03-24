@@ -125,25 +125,25 @@ func (f *AnsibleFetcher) FetchAnsibleVersion(version string) (*AnsibleVersionInf
 func (f *AnsibleFetcher) buildVersionContent(info *AnsibleVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Ansible %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Ansible %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using pip\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("pip install ansible==%s\n", info.Version))
+	fmt.Fprintf(&content, "pip install ansible==%s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using pip (with ansible-core)\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("pip install ansible-core==%s\n", info.Version))
+	fmt.Fprintf(&content, "pip install ansible-core==%s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using package manager (RHEL/CentOS)\n\n")
@@ -174,7 +174,7 @@ func (f *AnsibleFetcher) buildVersionContent(info *AnsibleVersionInfo, releaseNo
 	if idx := strings.LastIndex(majorMinor, "."); idx > 0 {
 		majorMinor = majorMinor[:idx]
 	}
-	content.WriteString(fmt.Sprintf("- [Ansible %s Documentation](https://docs.ansible.com/ansible/%s/)\n", majorMinor, majorMinor))
+	fmt.Fprintf(&content, "- [Ansible %s Documentation](https://docs.ansible.com/ansible/%s/)\n", majorMinor, majorMinor)
 
 	return content.String()
 }
@@ -190,12 +190,12 @@ func (f *AnsibleFetcher) saveVersionInfoAsMarkdown(filePath string, info *Ansibl
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

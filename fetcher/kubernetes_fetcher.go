@@ -125,28 +125,28 @@ func (f *KubernetesFetcher) FetchKubernetesVersion(version string) (*KubernetesV
 func (f *KubernetesFetcher) buildVersionContent(info *KubernetesVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Kubernetes %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Kubernetes %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Install kubectl\n\n")
 	content.WriteString("#### Using curl (Linux/macOS)\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("curl -LO \"https://dl.k8s.io/release/%s/bin/linux/amd64/kubectl\"\n", info.Version))
+	fmt.Fprintf(&content, "curl -LO \"https://dl.k8s.io/release/%s/bin/linux/amd64/kubectl\"\n", info.Version)
 	content.WriteString("chmod +x kubectl\n")
 	content.WriteString("sudo mv kubectl /usr/local/bin/\n")
 	content.WriteString("```\n\n")
 
 	content.WriteString("#### Using Homebrew (macOS)\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("brew install kubectl@%s\n", strings.TrimPrefix(info.Version, "v")))
+	fmt.Fprintf(&content, "brew install kubectl@%s\n", strings.TrimPrefix(info.Version, "v"))
 	content.WriteString("```\n\n")
 
 	content.WriteString("#### Using Chocolatey (Windows)\n\n")
@@ -185,7 +185,7 @@ func (f *KubernetesFetcher) buildVersionContent(info *KubernetesVersionInfo, rel
 	if idx := strings.LastIndex(majorMinor, "."); idx > 0 {
 		majorMinor = majorMinor[:idx]
 	}
-	content.WriteString(fmt.Sprintf("- [Kubernetes v%s Documentation](https://kubernetes.io/docs/reference/kubernetes-api/)\n", majorMinor))
+	fmt.Fprintf(&content, "- [Kubernetes v%s Documentation](https://kubernetes.io/docs/reference/kubernetes-api/)\n", majorMinor)
 
 	return content.String()
 }
@@ -201,12 +201,12 @@ func (f *KubernetesFetcher) saveVersionInfoAsMarkdown(filePath string, info *Kub
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

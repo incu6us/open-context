@@ -275,26 +275,26 @@ func (f *GoFetcher) extractDescription(doc *html.Node, pkgPath string) string {
 	// Build markdown documentation
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Package %s\n\n", pkgPath))
-	content.WriteString(fmt.Sprintf("Import path: `%s`\n\n", pkgPath))
+	fmt.Fprintf(&content, "# Package %s\n\n", pkgPath)
+	fmt.Fprintf(&content, "Import path: `%s`\n\n", pkgPath)
 
 	if synopsis != "" {
-		content.WriteString(fmt.Sprintf("%s\n\n", synopsis))
+		fmt.Fprintf(&content, "%s\n\n", synopsis)
 	}
 
 	content.WriteString("## Overview\n\n")
-	content.WriteString(fmt.Sprintf("The `%s` package provides functionality as documented at [pkg.go.dev/%s](%s/%s).\n\n",
-		filepath.Base(pkgPath), pkgPath, pkgGoDevBaseURL, pkgPath))
+	fmt.Fprintf(&content, "The `%s` package provides functionality as documented at [pkg.go.dev/%s](%s/%s).\n\n",
+		filepath.Base(pkgPath), pkgPath, pkgGoDevBaseURL, pkgPath)
 
 	content.WriteString("## Import\n\n")
 	content.WriteString("```go\n")
-	content.WriteString(fmt.Sprintf("import \"%s\"\n", pkgPath))
+	fmt.Fprintf(&content, "import \"%s\"\n", pkgPath)
 	content.WriteString("```\n\n")
 
 	content.WriteString("## Documentation\n\n")
 	content.WriteString("For detailed documentation, examples, and API reference, visit:\n\n")
-	content.WriteString(fmt.Sprintf("- [pkg.go.dev/%s](%s/%s)\n", pkgPath, pkgGoDevBaseURL, pkgPath))
-	content.WriteString(fmt.Sprintf("- [Go Standard Library Documentation](https://golang.org/pkg/%s/)\n\n", pkgPath))
+	fmt.Fprintf(&content, "- [pkg.go.dev/%s](%s/%s)\n", pkgPath, pkgGoDevBaseURL, pkgPath)
+	fmt.Fprintf(&content, "- [Go Standard Library Documentation](https://golang.org/pkg/%s/)\n\n", pkgPath)
 
 	// Add common usage note
 	content.WriteString("## Usage\n\n")
@@ -510,8 +510,8 @@ func (f *GoFetcher) FetchLibraryInfo(importPath, version string) (*LibraryInfo, 
 func (f *GoFetcher) extractReleaseNotes(doc *html.Node, version string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Go %s Release Notes\n\n", version))
-	content.WriteString(fmt.Sprintf("Official release notes: [go.dev/doc/go%s](https://go.dev/doc/go%s)\n\n", version, version))
+	fmt.Fprintf(&content, "# Go %s Release Notes\n\n", version)
+	fmt.Fprintf(&content, "Official release notes: [go.dev/doc/go%s](https://go.dev/doc/go%s)\n\n", version, version)
 
 	// Extract main content
 	var extractContent func(*html.Node, bool)
@@ -530,17 +530,17 @@ func (f *GoFetcher) extractReleaseNotes(doc *html.Node, version string) string {
 					text := strings.TrimSpace(getText(n))
 					if text != "" {
 						prefix := strings.Repeat("#", getHeadingLevel(n.Data))
-						content.WriteString(fmt.Sprintf("%s %s\n\n", prefix, text))
+						fmt.Fprintf(&content, "%s %s\n\n", prefix, text)
 					}
 				case "p":
 					text := strings.TrimSpace(getText(n))
 					if text != "" {
-						content.WriteString(fmt.Sprintf("%s\n\n", text))
+						fmt.Fprintf(&content, "%s\n\n", text)
 					}
 				case "pre":
 					code := strings.TrimSpace(getText(n))
 					if code != "" {
-						content.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+						fmt.Fprintf(&content, "```\n%s\n```\n\n", code)
 					}
 				case "ul", "ol":
 					f.extractList(n, &content)
@@ -558,8 +558,8 @@ func (f *GoFetcher) extractReleaseNotes(doc *html.Node, version string) string {
 	// If no content was extracted, provide a default message
 	if !inArticle {
 		content.WriteString("## Overview\n\n")
-		content.WriteString(fmt.Sprintf("Go %s introduces new features and improvements. ", version))
-		content.WriteString(fmt.Sprintf("Visit the [official release notes](https://go.dev/doc/go%s) for complete details.\n", version))
+		fmt.Fprintf(&content, "Go %s introduces new features and improvements. ", version)
+		fmt.Fprintf(&content, "Visit the [official release notes](https://go.dev/doc/go%s) for complete details.\n", version)
 	}
 
 	return content.String()
@@ -573,38 +573,38 @@ func (f *GoFetcher) extractLibraryDescription(doc *html.Node, importPath, versio
 		versionStr = version
 	}
 
-	content.WriteString(fmt.Sprintf("# %s\n\n", importPath))
-	content.WriteString(fmt.Sprintf("**Version:** %s\n\n", versionStr))
-	content.WriteString(fmt.Sprintf("**Import path:** `%s`\n\n", importPath))
+	fmt.Fprintf(&content, "# %s\n\n", importPath)
+	fmt.Fprintf(&content, "**Version:** %s\n\n", versionStr)
+	fmt.Fprintf(&content, "**Import path:** `%s`\n\n", importPath)
 
 	// Add synopsis
 	synopsis := f.extractSynopsis(doc)
 	if synopsis != "" {
-		content.WriteString(fmt.Sprintf("%s\n\n", synopsis))
+		fmt.Fprintf(&content, "%s\n\n", synopsis)
 	}
 
 	// Add repository and license info
 	repo := f.extractRepository(doc)
 	if repo != "" {
-		content.WriteString(fmt.Sprintf("**Repository:** %s\n\n", repo))
+		fmt.Fprintf(&content, "**Repository:** %s\n\n", repo)
 	}
 
 	license := f.extractLicense(doc)
 	if license != "" {
-		content.WriteString(fmt.Sprintf("**License:** %s\n\n", license))
+		fmt.Fprintf(&content, "**License:** %s\n\n", license)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("go get %s", importPath))
+	fmt.Fprintf(&content, "go get %s", importPath)
 	if version != "" {
-		content.WriteString(fmt.Sprintf("@%s", version))
+		fmt.Fprintf(&content, "@%s", version)
 	}
 	content.WriteString("\n```\n\n")
 
 	content.WriteString("## Import\n\n")
 	content.WriteString("```go\n")
-	content.WriteString(fmt.Sprintf("import \"%s\"\n", importPath))
+	fmt.Fprintf(&content, "import \"%s\"\n", importPath)
 	content.WriteString("```\n\n")
 
 	content.WriteString("## Documentation\n\n")
@@ -612,7 +612,7 @@ func (f *GoFetcher) extractLibraryDescription(doc *html.Node, importPath, versio
 	if version != "" {
 		url = fmt.Sprintf("%s/%s@%s", pkgGoDevBaseURL, importPath, version)
 	}
-	content.WriteString(fmt.Sprintf("For detailed documentation and examples, visit [pkg.go.dev](%s)\n", url))
+	fmt.Fprintf(&content, "For detailed documentation and examples, visit [pkg.go.dev](%s)\n", url)
 
 	return content.String()
 }
@@ -850,8 +850,8 @@ func (f *GoFetcher) saveVersionInfoAsMarkdown(filePath string, info *GoVersionIn
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
-	content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
+	fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	content.WriteString("---\n\n")
 
 	// Markdown content
@@ -870,18 +870,18 @@ func (f *GoFetcher) saveLibraryInfoAsMarkdown(filePath string, info *LibraryInfo
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("importPath: \"%s\"\n", info.ImportPath))
+	fmt.Fprintf(&content, "importPath: \"%s\"\n", info.ImportPath)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+		fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	}
 	if info.Synopsis != "" {
-		content.WriteString(fmt.Sprintf("synopsis: \"%s\"\n", strings.ReplaceAll(info.Synopsis, "\"", "\\\"")))
+		fmt.Fprintf(&content, "synopsis: \"%s\"\n", strings.ReplaceAll(info.Synopsis, "\"", "\\\""))
 	}
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
+		fmt.Fprintf(&content, "repository: \"%s\"\n", info.Repository)
 	}
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("license: \"%s\"\n", info.License))
+		fmt.Fprintf(&content, "license: \"%s\"\n", info.License)
 	}
 	content.WriteString("---\n\n")
 

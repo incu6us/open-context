@@ -125,30 +125,30 @@ func (f *NextJSFetcher) FetchNextJSVersion(version string) (*NextJSVersionInfo, 
 func (f *NextJSFetcher) buildVersionContent(info *NextJSVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Next.js %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Next.js %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using npm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("npm install next@%s react@latest react-dom@latest\n", info.Version))
+	fmt.Fprintf(&content, "npm install next@%s react@latest react-dom@latest\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using yarn\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("yarn add next@%s react@latest react-dom@latest\n", info.Version))
+	fmt.Fprintf(&content, "yarn add next@%s react@latest react-dom@latest\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using pnpm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("pnpm add next@%s react@latest react-dom@latest\n", info.Version))
+	fmt.Fprintf(&content, "pnpm add next@%s react@latest react-dom@latest\n", info.Version)
 	content.WriteString("```\n\n")
 
 	if releaseNotes != "" {
@@ -167,7 +167,7 @@ func (f *NextJSFetcher) buildVersionContent(info *NextJSVersionInfo, releaseNote
 	if idx := strings.LastIndex(majorMinor, "."); idx > 0 {
 		majorMinor = majorMinor[:idx]
 	}
-	content.WriteString(fmt.Sprintf("- [Next.js %s Documentation](https://nextjs.org/docs)\n", majorMinor))
+	fmt.Fprintf(&content, "- [Next.js %s Documentation](https://nextjs.org/docs)\n", majorMinor)
 
 	return content.String()
 }
@@ -183,12 +183,12 @@ func (f *NextJSFetcher) saveVersionInfoAsMarkdown(filePath string, info *NextJSV
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

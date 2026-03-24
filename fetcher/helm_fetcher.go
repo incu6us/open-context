@@ -125,14 +125,14 @@ func (f *HelmFetcher) FetchHelmVersion(version string) (*HelmVersionInfo, error)
 func (f *HelmFetcher) buildVersionContent(info *HelmVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Helm %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Helm %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
@@ -143,7 +143,7 @@ func (f *HelmFetcher) buildVersionContent(info *HelmVersionInfo, releaseNotes st
 
 	content.WriteString("### Using Homebrew (macOS)\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("brew install helm@%s\n", strings.TrimPrefix(info.Version, "v")))
+	fmt.Fprintf(&content, "brew install helm@%s\n", strings.TrimPrefix(info.Version, "v"))
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using Chocolatey (Windows)\n\n")
@@ -157,12 +157,12 @@ func (f *HelmFetcher) buildVersionContent(info *HelmVersionInfo, releaseNotes st
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Direct Download\n\n")
-	content.WriteString(fmt.Sprintf("Download from [GitHub Releases](https://github.com/helm/helm/releases/tag/%s)\n\n", info.Version))
+	fmt.Fprintf(&content, "Download from [GitHub Releases](https://github.com/helm/helm/releases/tag/%s)\n\n", info.Version)
 
 	content.WriteString("### From Binary Releases\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("wget https://get.helm.sh/helm-%s-linux-amd64.tar.gz\n", info.Version))
-	content.WriteString(fmt.Sprintf("tar -zxvf helm-%s-linux-amd64.tar.gz\n", info.Version))
+	fmt.Fprintf(&content, "wget https://get.helm.sh/helm-%s-linux-amd64.tar.gz\n", info.Version)
+	fmt.Fprintf(&content, "tar -zxvf helm-%s-linux-amd64.tar.gz\n", info.Version)
 	content.WriteString("sudo mv linux-amd64/helm /usr/local/bin/helm\n")
 	content.WriteString("```\n\n")
 
@@ -193,12 +193,12 @@ func (f *HelmFetcher) saveVersionInfoAsMarkdown(filePath string, info *HelmVersi
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

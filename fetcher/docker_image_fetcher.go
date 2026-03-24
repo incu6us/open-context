@@ -206,22 +206,22 @@ func (f *DockerImageFetcher) fetchAvailableTags(namespace, repository string, li
 func (f *DockerImageFetcher) buildImageContent(info *DockerImageInfo, tagData *DockerHubTagResponse) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Docker Image: %s\n\n", info.FullImage))
+	fmt.Fprintf(&content, "# Docker Image: %s\n\n", info.FullImage)
 
 	if len(tagData.Results) > 0 {
 		tag := tagData.Results[0]
 
 		content.WriteString("## Image Information\n\n")
-		content.WriteString(fmt.Sprintf("**Tag:** %s\n\n", info.Tag))
-		content.WriteString(fmt.Sprintf("**Last Updated:** %s\n\n", info.LastUpdated))
+		fmt.Fprintf(&content, "**Tag:** %s\n\n", info.Tag)
+		fmt.Fprintf(&content, "**Last Updated:** %s\n\n", info.LastUpdated)
 
 		if tag.FullSize > 0 {
 			sizeMB := float64(tag.FullSize) / (1024 * 1024)
-			content.WriteString(fmt.Sprintf("**Size:** %.2f MB\n\n", sizeMB))
+			fmt.Fprintf(&content, "**Size:** %.2f MB\n\n", sizeMB)
 		}
 
 		if info.Digest != "" {
-			content.WriteString(fmt.Sprintf("**Digest:** `%s`\n\n", info.Digest))
+			fmt.Fprintf(&content, "**Digest:** `%s`\n\n", info.Digest)
 		}
 
 		// Architecture information
@@ -233,7 +233,7 @@ func (f *DockerImageFetcher) buildImageContent(info *DockerImageInfo, tagData *D
 				archMap[arch] = true
 			}
 			for arch := range archMap {
-				content.WriteString(fmt.Sprintf("- %s\n", arch))
+				fmt.Fprintf(&content, "- %s\n", arch)
 			}
 			content.WriteString("\n")
 		}
@@ -243,35 +243,35 @@ func (f *DockerImageFetcher) buildImageContent(info *DockerImageInfo, tagData *D
 	content.WriteString("## Usage\n\n")
 	content.WriteString("### Pull the image\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("docker pull %s\n", info.FullImage))
+	fmt.Fprintf(&content, "docker pull %s\n", info.FullImage)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Run a container\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("docker run -it %s\n", info.FullImage))
+	fmt.Fprintf(&content, "docker run -it %s\n", info.FullImage)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Use in Dockerfile\n\n")
 	content.WriteString("```dockerfile\n")
-	content.WriteString(fmt.Sprintf("FROM %s\n", info.FullImage))
+	fmt.Fprintf(&content, "FROM %s\n", info.FullImage)
 	content.WriteString("```\n\n")
 
 	// Available tags
 	if len(info.Tags) > 0 {
 		content.WriteString("## Recent Tags\n\n")
-		content.WriteString(fmt.Sprintf("For image `%s`, the following tags are available:\n\n", info.Image))
+		fmt.Fprintf(&content, "For image `%s`, the following tags are available:\n\n", info.Image)
 		for i, tag := range info.Tags {
 			if i >= 10 {
-				content.WriteString(fmt.Sprintf("\n...and %d more tags\n", len(info.Tags)-10))
+				fmt.Fprintf(&content, "\n...and %d more tags\n", len(info.Tags)-10)
 				break
 			}
-			content.WriteString(fmt.Sprintf("- `%s`\n", tag))
+			fmt.Fprintf(&content, "- `%s`\n", tag)
 		}
 		content.WriteString("\n")
 	}
 
 	content.WriteString("## Documentation\n\n")
-	content.WriteString(fmt.Sprintf("- [Docker Hub Repository](https://hub.docker.com/r/%s)\n", info.Image))
+	fmt.Fprintf(&content, "- [Docker Hub Repository](https://hub.docker.com/r/%s)\n", info.Image)
 	content.WriteString("- [Docker Documentation](https://docs.docker.com/)\n")
 
 	return content.String()
@@ -288,15 +288,15 @@ func (f *DockerImageFetcher) saveImageInfoAsMarkdown(filePath string, info *Dock
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("image: \"%s\"\n", info.Image))
-	content.WriteString(fmt.Sprintf("tag: \"%s\"\n", info.Tag))
+	fmt.Fprintf(&content, "image: \"%s\"\n", info.Image)
+	fmt.Fprintf(&content, "tag: \"%s\"\n", info.Tag)
 	if info.Digest != "" {
-		content.WriteString(fmt.Sprintf("digest: \"%s\"\n", info.Digest))
+		fmt.Fprintf(&content, "digest: \"%s\"\n", info.Digest)
 	}
 	if info.LastUpdated != "" {
-		content.WriteString(fmt.Sprintf("lastUpdated: \"%s\"\n", info.LastUpdated))
+		fmt.Fprintf(&content, "lastUpdated: \"%s\"\n", info.LastUpdated)
 	}
-	content.WriteString(fmt.Sprintf("fullImage: \"%s\"\n", info.FullImage))
+	fmt.Fprintf(&content, "fullImage: \"%s\"\n", info.FullImage)
 	content.WriteString("---\n\n")
 
 	// Markdown content

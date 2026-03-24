@@ -122,35 +122,35 @@ func (f *PythonFetcher) FetchPackageInfo(packageName, version string) (*PythonPa
 func (f *PythonFetcher) buildPackageContent(info *PythonPackageInfo) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# %s\n\n", info.Name))
+	fmt.Fprintf(&content, "# %s\n\n", info.Name)
 
 	if info.Summary != "" {
-		content.WriteString(fmt.Sprintf("**Summary:** %s\n\n", info.Summary))
+		fmt.Fprintf(&content, "**Summary:** %s\n\n", info.Summary)
 	}
 
-	content.WriteString(fmt.Sprintf("**Version:** %s\n\n", info.Version))
+	fmt.Fprintf(&content, "**Version:** %s\n\n", info.Version)
 
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("**Author:** %s\n\n", info.Author))
+		fmt.Fprintf(&content, "**Author:** %s\n\n", info.Author)
 	}
 
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("**License:** %s\n\n", info.License))
+		fmt.Fprintf(&content, "**License:** %s\n\n", info.License)
 	}
 
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("**Homepage:** %s\n\n", info.Homepage))
+		fmt.Fprintf(&content, "**Homepage:** %s\n\n", info.Homepage)
 	}
 
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("**Repository:** %s\n\n", info.Repository))
+		fmt.Fprintf(&content, "**Repository:** %s\n\n", info.Repository)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("pip install %s", info.Name))
+	fmt.Fprintf(&content, "pip install %s", info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("==%s", info.Version))
+		fmt.Fprintf(&content, "==%s", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
@@ -158,20 +158,20 @@ func (f *PythonFetcher) buildPackageContent(info *PythonPackageInfo) string {
 	content.WriteString("```\n")
 	content.WriteString(info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("==%s", info.Version))
+		fmt.Fprintf(&content, "==%s", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
 	content.WriteString("### Using Poetry\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("poetry add %s", info.Name))
+	fmt.Fprintf(&content, "poetry add %s", info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("@%s", info.Version))
+		fmt.Fprintf(&content, "@%s", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
 	content.WriteString("## Documentation\n\n")
-	content.WriteString(fmt.Sprintf("For detailed documentation, visit [PyPI](https://pypi.org/project/%s/)\n", info.Name))
+	fmt.Fprintf(&content, "For detailed documentation, visit [PyPI](https://pypi.org/project/%s/)\n", info.Name)
 
 	return content.String()
 }
@@ -187,22 +187,22 @@ func (f *PythonFetcher) savePackageInfoAsMarkdown(filePath string, info *PythonP
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("name: \"%s\"\n", info.Name))
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "name: \"%s\"\n", info.Name)
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.Summary != "" {
-		content.WriteString(fmt.Sprintf("summary: \"%s\"\n", escapeYAMLString(info.Summary)))
+		fmt.Fprintf(&content, "summary: \"%s\"\n", escapeYAMLString(info.Summary))
 	}
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("homepage: \"%s\"\n", info.Homepage))
+		fmt.Fprintf(&content, "homepage: \"%s\"\n", info.Homepage)
 	}
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
+		fmt.Fprintf(&content, "repository: \"%s\"\n", info.Repository)
 	}
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("license: \"%s\"\n", escapeYAMLString(info.License)))
+		fmt.Fprintf(&content, "license: \"%s\"\n", escapeYAMLString(info.License))
 	}
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("author: \"%s\"\n", escapeYAMLString(info.Author)))
+		fmt.Fprintf(&content, "author: \"%s\"\n", escapeYAMLString(info.Author))
 	}
 	content.WriteString("---\n\n")
 

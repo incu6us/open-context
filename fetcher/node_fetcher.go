@@ -113,39 +113,39 @@ func (f *NodeFetcher) FetchNodeVersion(version string) (*NodeVersionInfo, error)
 func (f *NodeFetcher) buildVersionContent(info *NodeVersionInfo, data map[string]interface{}) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Node.js %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Node.js %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.LTS != "" && info.LTS != "false" {
-		content.WriteString(fmt.Sprintf("**LTS:** %s\n\n", info.LTS))
+		fmt.Fprintf(&content, "**LTS:** %s\n\n", info.LTS)
 	}
 
 	// Add modules information if available
 	if modules, ok := data["modules"].(string); ok {
-		content.WriteString(fmt.Sprintf("**Modules Version:** %s\n\n", modules))
+		fmt.Fprintf(&content, "**Modules Version:** %s\n\n", modules)
 	}
 
 	// Add V8 version if available
 	if v8, ok := data["v8"].(string); ok {
-		content.WriteString(fmt.Sprintf("**V8 Version:** %s\n\n", v8))
+		fmt.Fprintf(&content, "**V8 Version:** %s\n\n", v8)
 	}
 
 	// Add npm version if available
 	if npm, ok := data["npm"].(string); ok {
-		content.WriteString(fmt.Sprintf("**npm Version:** %s\n\n", npm))
+		fmt.Fprintf(&content, "**npm Version:** %s\n\n", npm)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using nvm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("nvm install %s\n", info.Version))
+	fmt.Fprintf(&content, "nvm install %s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Download\n\n")
-	content.WriteString(fmt.Sprintf("Download from [nodejs.org](https://nodejs.org/dist/%s/)\n\n", info.Version))
+	fmt.Fprintf(&content, "Download from [nodejs.org](https://nodejs.org/dist/%s/)\n\n", info.Version)
 
 	content.WriteString("## Documentation\n\n")
 	// Extract major version for documentation link
@@ -153,7 +153,7 @@ func (f *NodeFetcher) buildVersionContent(info *NodeVersionInfo, data map[string
 	if idx := strings.Index(majorVersion, "."); idx > 0 {
 		majorVersion = majorVersion[:idx]
 	}
-	content.WriteString(fmt.Sprintf("For detailed documentation, visit [Node.js v%s Documentation](https://nodejs.org/docs/latest-v%s.x/api/)\n", majorVersion, majorVersion))
+	fmt.Fprintf(&content, "For detailed documentation, visit [Node.js v%s Documentation](https://nodejs.org/docs/latest-v%s.x/api/)\n", majorVersion, majorVersion)
 
 	return content.String()
 }
@@ -169,12 +169,12 @@ func (f *NodeFetcher) saveVersionInfoAsMarkdown(filePath string, info *NodeVersi
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.LTS != "" {
-		content.WriteString(fmt.Sprintf("lts: \"%s\"\n", info.LTS))
+		fmt.Fprintf(&content, "lts: \"%s\"\n", info.LTS)
 	}
 	content.WriteString("---\n\n")
 

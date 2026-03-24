@@ -125,24 +125,24 @@ func (f *JenkinsFetcher) FetchJenkinsVersion(version string) (*JenkinsVersionInf
 func (f *JenkinsFetcher) buildVersionContent(info *JenkinsVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# Jenkins %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# Jenkins %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Download WAR File\n\n")
-	content.WriteString(fmt.Sprintf("Download from [Jenkins Downloads](https://get.jenkins.io/war/%s/jenkins.war)\n\n", info.Version))
+	fmt.Fprintf(&content, "Download from [Jenkins Downloads](https://get.jenkins.io/war/%s/jenkins.war)\n\n", info.Version)
 
 	content.WriteString("### Using Docker\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("docker pull jenkins/jenkins:%s\n", info.Version))
-	content.WriteString(fmt.Sprintf("docker run -p 8080:8080 -p 50000:50000 jenkins/jenkins:%s\n", info.Version))
+	fmt.Fprintf(&content, "docker pull jenkins/jenkins:%s\n", info.Version)
+	fmt.Fprintf(&content, "docker run -p 8080:8080 -p 50000:50000 jenkins/jenkins:%s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using Package Manager (Debian/Ubuntu)\n\n")
@@ -188,12 +188,12 @@ func (f *JenkinsFetcher) saveVersionInfoAsMarkdown(filePath string, info *Jenkin
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 

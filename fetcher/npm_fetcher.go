@@ -134,42 +134,42 @@ func (f *NPMFetcher) FetchPackageInfo(packageName, version string) (*NPMPackageI
 func (f *NPMFetcher) buildPackageContent(info *NPMPackageInfo) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# %s\n\n", info.Name))
+	fmt.Fprintf(&content, "# %s\n\n", info.Name)
 
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("**Description:** %s\n\n", info.Description))
+		fmt.Fprintf(&content, "**Description:** %s\n\n", info.Description)
 	}
 
-	content.WriteString(fmt.Sprintf("**Version:** %s\n\n", info.Version))
+	fmt.Fprintf(&content, "**Version:** %s\n\n", info.Version)
 
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("**Author:** %s\n\n", info.Author))
+		fmt.Fprintf(&content, "**Author:** %s\n\n", info.Author)
 	}
 
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("**License:** %s\n\n", info.License))
+		fmt.Fprintf(&content, "**License:** %s\n\n", info.License)
 	}
 
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("**Homepage:** %s\n\n", info.Homepage))
+		fmt.Fprintf(&content, "**Homepage:** %s\n\n", info.Homepage)
 	}
 
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("**Repository:** %s\n\n", info.Repository))
+		fmt.Fprintf(&content, "**Repository:** %s\n\n", info.Repository)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("npm install %s", info.Name))
+	fmt.Fprintf(&content, "npm install %s", info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("@%s", info.Version))
+		fmt.Fprintf(&content, "@%s", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
 	content.WriteString("## Documentation\n\n")
-	content.WriteString(fmt.Sprintf("For detailed documentation, visit [npmjs.com](https://www.npmjs.com/package/%s)", info.Name))
+	fmt.Fprintf(&content, "For detailed documentation, visit [npmjs.com](https://www.npmjs.com/package/%s)", info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("/v/%s", info.Version))
+		fmt.Fprintf(&content, "/v/%s", info.Version)
 	}
 	content.WriteString("\n")
 
@@ -187,22 +187,22 @@ func (f *NPMFetcher) savePackageInfoAsMarkdown(filePath string, info *NPMPackage
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("name: \"%s\"\n", info.Name))
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "name: \"%s\"\n", info.Name)
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("description: \"%s\"\n", escapeYAML(info.Description)))
+		fmt.Fprintf(&content, "description: \"%s\"\n", escapeYAML(info.Description))
 	}
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("homepage: \"%s\"\n", info.Homepage))
+		fmt.Fprintf(&content, "homepage: \"%s\"\n", info.Homepage)
 	}
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
+		fmt.Fprintf(&content, "repository: \"%s\"\n", info.Repository)
 	}
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("license: \"%s\"\n", info.License))
+		fmt.Fprintf(&content, "license: \"%s\"\n", info.License)
 	}
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("author: \"%s\"\n", escapeYAML(info.Author)))
+		fmt.Fprintf(&content, "author: \"%s\"\n", escapeYAML(info.Author))
 	}
 	content.WriteString("---\n\n")
 

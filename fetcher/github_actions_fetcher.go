@@ -219,29 +219,29 @@ func (f *GitHubActionsFetcher) fetchLatestRelease(repository string) string {
 func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, actionYml map[string]interface{}) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# %s\n\n", info.Name))
+	fmt.Fprintf(&content, "# %s\n\n", info.Name)
 
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("**Description:** %s\n\n", info.Description))
+		fmt.Fprintf(&content, "**Description:** %s\n\n", info.Description)
 	}
 
-	content.WriteString(fmt.Sprintf("**Repository:** %s\n\n", info.Repository))
-	content.WriteString(fmt.Sprintf("**Version:** %s\n\n", info.Version))
+	fmt.Fprintf(&content, "**Repository:** %s\n\n", info.Repository)
+	fmt.Fprintf(&content, "**Version:** %s\n\n", info.Version)
 
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("**Author:** %s\n\n", info.Author))
+		fmt.Fprintf(&content, "**Author:** %s\n\n", info.Author)
 	}
 
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("**License:** %s\n\n", info.License))
+		fmt.Fprintf(&content, "**License:** %s\n\n", info.License)
 	}
 
 	if info.Stars > 0 {
-		content.WriteString(fmt.Sprintf("**Stars:** %d\n\n", info.Stars))
+		fmt.Fprintf(&content, "**Stars:** %d\n\n", info.Stars)
 	}
 
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("**Homepage:** %s\n\n", info.Homepage))
+		fmt.Fprintf(&content, "**Homepage:** %s\n\n", info.Homepage)
 	}
 
 	// Add inputs if available
@@ -249,16 +249,16 @@ func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, action
 		if inputs, ok := actionYml["inputs"].(map[string]interface{}); ok && len(inputs) > 0 {
 			content.WriteString("## Inputs\n\n")
 			for inputName, inputDef := range inputs {
-				content.WriteString(fmt.Sprintf("### `%s`\n\n", inputName))
+				fmt.Fprintf(&content, "### `%s`\n\n", inputName)
 				if inputMap, ok := inputDef.(map[string]interface{}); ok {
 					if desc, ok := inputMap["description"].(string); ok {
-						content.WriteString(fmt.Sprintf("%s\n\n", desc))
+						fmt.Fprintf(&content, "%s\n\n", desc)
 					}
 					if required, ok := inputMap["required"].(bool); ok && required {
 						content.WriteString("**Required:** Yes\n\n")
 					}
 					if defaultVal, ok := inputMap["default"]; ok {
-						content.WriteString(fmt.Sprintf("**Default:** `%v`\n\n", defaultVal))
+						fmt.Fprintf(&content, "**Default:** `%v`\n\n", defaultVal)
 					}
 				}
 			}
@@ -268,10 +268,10 @@ func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, action
 		if outputs, ok := actionYml["outputs"].(map[string]interface{}); ok && len(outputs) > 0 {
 			content.WriteString("## Outputs\n\n")
 			for outputName, outputDef := range outputs {
-				content.WriteString(fmt.Sprintf("### `%s`\n\n", outputName))
+				fmt.Fprintf(&content, "### `%s`\n\n", outputName)
 				if outputMap, ok := outputDef.(map[string]interface{}); ok {
 					if desc, ok := outputMap["description"].(string); ok {
-						content.WriteString(fmt.Sprintf("%s\n\n", desc))
+						fmt.Fprintf(&content, "%s\n\n", desc)
 					}
 				}
 			}
@@ -286,7 +286,7 @@ func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, action
 	content.WriteString("  example:\n")
 	content.WriteString("    runs-on: ubuntu-latest\n")
 	content.WriteString("    steps:\n")
-	content.WriteString(fmt.Sprintf("      - uses: %s@%s\n", info.Repository, info.Version))
+	fmt.Fprintf(&content, "      - uses: %s@%s\n", info.Repository, info.Version)
 
 	// Add example inputs if available
 	if actionYml != nil {
@@ -299,7 +299,7 @@ func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, action
 				}
 				if inputMap, ok := inputDef.(map[string]interface{}); ok {
 					if defaultVal, ok := inputMap["default"]; ok {
-						content.WriteString(fmt.Sprintf("          %s: %v\n", inputName, defaultVal))
+						fmt.Fprintf(&content, "          %s: %v\n", inputName, defaultVal)
 						count++
 					}
 				}
@@ -309,8 +309,8 @@ func (f *GitHubActionsFetcher) buildActionContent(info *GitHubActionInfo, action
 	content.WriteString("```\n\n")
 
 	content.WriteString("## Links\n\n")
-	content.WriteString(fmt.Sprintf("- [GitHub Repository](https://github.com/%s)\n", info.Repository))
-	content.WriteString(fmt.Sprintf("- [GitHub Marketplace](https://github.com/marketplace/actions/%s)\n", strings.ReplaceAll(info.Repository, "/", "-")))
+	fmt.Fprintf(&content, "- [GitHub Repository](https://github.com/%s)\n", info.Repository)
+	fmt.Fprintf(&content, "- [GitHub Marketplace](https://github.com/marketplace/actions/%s)\n", strings.ReplaceAll(info.Repository, "/", "-"))
 
 	return content.String()
 }
@@ -326,25 +326,25 @@ func (f *GitHubActionsFetcher) saveActionInfoAsMarkdown(filePath string, info *G
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
-	content.WriteString(fmt.Sprintf("name: \"%s\"\n", escapeYAMLActionString(info.Name)))
+	fmt.Fprintf(&content, "repository: \"%s\"\n", info.Repository)
+	fmt.Fprintf(&content, "name: \"%s\"\n", escapeYAMLActionString(info.Name))
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("description: \"%s\"\n", escapeYAMLActionString(info.Description)))
+		fmt.Fprintf(&content, "description: \"%s\"\n", escapeYAMLActionString(info.Description))
 	}
 	if info.Author != "" {
-		content.WriteString(fmt.Sprintf("author: \"%s\"\n", info.Author))
+		fmt.Fprintf(&content, "author: \"%s\"\n", info.Author)
 	}
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+		fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	}
 	if info.Stars > 0 {
-		content.WriteString(fmt.Sprintf("stars: %d\n", info.Stars))
+		fmt.Fprintf(&content, "stars: %d\n", info.Stars)
 	}
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("license: \"%s\"\n", info.License))
+		fmt.Fprintf(&content, "license: \"%s\"\n", info.License)
 	}
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("homepage: \"%s\"\n", info.Homepage))
+		fmt.Fprintf(&content, "homepage: \"%s\"\n", info.Homepage)
 	}
 	content.WriteString("---\n\n")
 

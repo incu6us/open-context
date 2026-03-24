@@ -136,40 +136,40 @@ func (f *RustFetcher) FetchCrateInfo(crateName, version string) (*RustCrateInfo,
 func (f *RustFetcher) buildCrateContent(info *RustCrateInfo) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# %s\n\n", info.Name))
+	fmt.Fprintf(&content, "# %s\n\n", info.Name)
 
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("**Description:** %s\n\n", info.Description))
+		fmt.Fprintf(&content, "**Description:** %s\n\n", info.Description)
 	}
 
-	content.WriteString(fmt.Sprintf("**Version:** %s\n\n", info.Version))
+	fmt.Fprintf(&content, "**Version:** %s\n\n", info.Version)
 
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("**License:** %s\n\n", info.License))
+		fmt.Fprintf(&content, "**License:** %s\n\n", info.License)
 	}
 
 	if info.Downloads > 0 {
-		content.WriteString(fmt.Sprintf("**Downloads:** %d\n\n", info.Downloads))
+		fmt.Fprintf(&content, "**Downloads:** %d\n\n", info.Downloads)
 	}
 
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("**Homepage:** %s\n\n", info.Homepage))
+		fmt.Fprintf(&content, "**Homepage:** %s\n\n", info.Homepage)
 	}
 
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("**Repository:** %s\n\n", info.Repository))
+		fmt.Fprintf(&content, "**Repository:** %s\n\n", info.Repository)
 	}
 
 	if info.Documentation != "" {
-		content.WriteString(fmt.Sprintf("**Documentation:** %s\n\n", info.Documentation))
+		fmt.Fprintf(&content, "**Documentation:** %s\n\n", info.Documentation)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using Cargo\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("cargo add %s", info.Name))
+	fmt.Fprintf(&content, "cargo add %s", info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf("@%s", info.Version))
+		fmt.Fprintf(&content, "@%s", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
@@ -178,19 +178,19 @@ func (f *RustFetcher) buildCrateContent(info *RustCrateInfo) string {
 	content.WriteString("[dependencies]\n")
 	content.WriteString(info.Name)
 	if info.Version != "" {
-		content.WriteString(fmt.Sprintf(" = \"%s\"", info.Version))
+		fmt.Fprintf(&content, " = \"%s\"", info.Version)
 	}
 	content.WriteString("\n```\n\n")
 
 	content.WriteString("## Links\n\n")
-	content.WriteString(fmt.Sprintf("- [Crates.io](https://crates.io/crates/%s)\n", info.Name))
+	fmt.Fprintf(&content, "- [Crates.io](https://crates.io/crates/%s)\n", info.Name)
 	if info.Documentation != "" {
-		content.WriteString(fmt.Sprintf("- [Documentation](%s)\n", info.Documentation))
+		fmt.Fprintf(&content, "- [Documentation](%s)\n", info.Documentation)
 	} else {
-		content.WriteString(fmt.Sprintf("- [Documentation](https://docs.rs/%s)\n", info.Name))
+		fmt.Fprintf(&content, "- [Documentation](https://docs.rs/%s)\n", info.Name)
 	}
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("- [Repository](%s)\n", info.Repository))
+		fmt.Fprintf(&content, "- [Repository](%s)\n", info.Repository)
 	}
 
 	return content.String()
@@ -207,25 +207,25 @@ func (f *RustFetcher) saveCrateInfoAsMarkdown(filePath string, info *RustCrateIn
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("name: \"%s\"\n", info.Name))
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "name: \"%s\"\n", info.Name)
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.Description != "" {
-		content.WriteString(fmt.Sprintf("description: \"%s\"\n", escapeYAMLCrateString(info.Description)))
+		fmt.Fprintf(&content, "description: \"%s\"\n", escapeYAMLCrateString(info.Description))
 	}
 	if info.Homepage != "" {
-		content.WriteString(fmt.Sprintf("homepage: \"%s\"\n", info.Homepage))
+		fmt.Fprintf(&content, "homepage: \"%s\"\n", info.Homepage)
 	}
 	if info.Repository != "" {
-		content.WriteString(fmt.Sprintf("repository: \"%s\"\n", info.Repository))
+		fmt.Fprintf(&content, "repository: \"%s\"\n", info.Repository)
 	}
 	if info.Documentation != "" {
-		content.WriteString(fmt.Sprintf("documentation: \"%s\"\n", info.Documentation))
+		fmt.Fprintf(&content, "documentation: \"%s\"\n", info.Documentation)
 	}
 	if info.License != "" {
-		content.WriteString(fmt.Sprintf("license: \"%s\"\n", escapeYAMLCrateString(info.License)))
+		fmt.Fprintf(&content, "license: \"%s\"\n", escapeYAMLCrateString(info.License))
 	}
 	if info.Downloads > 0 {
-		content.WriteString(fmt.Sprintf("downloads: %d\n", info.Downloads))
+		fmt.Fprintf(&content, "downloads: %d\n", info.Downloads)
 	}
 	content.WriteString("---\n\n")
 

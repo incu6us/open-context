@@ -125,25 +125,25 @@ func (f *TypeScriptFetcher) FetchTypeScriptVersion(version string) (*TypeScriptV
 func (f *TypeScriptFetcher) buildVersionContent(info *TypeScriptVersionInfo, releaseNotes string) string {
 	var content strings.Builder
 
-	content.WriteString(fmt.Sprintf("# TypeScript %s\n\n", info.Version))
+	fmt.Fprintf(&content, "# TypeScript %s\n\n", info.Version)
 
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("**Release Date:** %s\n\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "**Release Date:** %s\n\n", info.ReleaseDate)
 	}
 
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL))
+		fmt.Fprintf(&content, "**Release Notes:** [%s](%s)\n\n", info.Version, info.ReleaseURL)
 	}
 
 	content.WriteString("## Installation\n\n")
 	content.WriteString("### Using npm\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("npm install -g typescript@%s\n", info.Version))
+	fmt.Fprintf(&content, "npm install -g typescript@%s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	content.WriteString("### Using yarn\n\n")
 	content.WriteString("```bash\n")
-	content.WriteString(fmt.Sprintf("yarn global add typescript@%s\n", info.Version))
+	fmt.Fprintf(&content, "yarn global add typescript@%s\n", info.Version)
 	content.WriteString("```\n\n")
 
 	if releaseNotes != "" {
@@ -162,7 +162,7 @@ func (f *TypeScriptFetcher) buildVersionContent(info *TypeScriptVersionInfo, rel
 	if idx := strings.LastIndex(majorMinor, "."); idx > 0 {
 		majorMinor = majorMinor[:idx]
 	}
-	content.WriteString(fmt.Sprintf("- [TypeScript %s Release Notes](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-%s.html)\n", majorMinor, strings.ReplaceAll(majorMinor, ".", "-")))
+	fmt.Fprintf(&content, "- [TypeScript %s Release Notes](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-%s.html)\n", majorMinor, strings.ReplaceAll(majorMinor, ".", "-"))
 
 	return content.String()
 }
@@ -178,12 +178,12 @@ func (f *TypeScriptFetcher) saveVersionInfoAsMarkdown(filePath string, info *Typ
 
 	// YAML frontmatter
 	content.WriteString("---\n")
-	content.WriteString(fmt.Sprintf("version: \"%s\"\n", info.Version))
+	fmt.Fprintf(&content, "version: \"%s\"\n", info.Version)
 	if info.ReleaseDate != "" {
-		content.WriteString(fmt.Sprintf("releaseDate: \"%s\"\n", info.ReleaseDate))
+		fmt.Fprintf(&content, "releaseDate: \"%s\"\n", info.ReleaseDate)
 	}
 	if info.ReleaseURL != "" {
-		content.WriteString(fmt.Sprintf("releaseURL: \"%s\"\n", info.ReleaseURL))
+		fmt.Fprintf(&content, "releaseURL: \"%s\"\n", info.ReleaseURL)
 	}
 	content.WriteString("---\n\n")
 
