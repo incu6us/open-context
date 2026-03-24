@@ -161,8 +161,8 @@ func (s *MCPServer) handleInitialize(req Request) Response {
 		Result: InitializeResult{
 			ProtocolVersion: "2024-11-05",
 			Capabilities: Capabilities{
-				Tools:   map[string]interface{}{},
-				Prompts: map[string]interface{}{},
+				Tools:   map[string]interface{}{"listChanged": false},
+				Prompts: map[string]interface{}{"listChanged": false},
 			},
 			ServerInfo: ServerInfo{
 				Name:    "open-context",
