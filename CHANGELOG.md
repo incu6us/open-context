@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/incu6us/open-context/compare/v1.3.3...v1.3.4) (2026-03-24)
+
+
+### Bug Fixes
+
+* skip sending a response for notifications ([6373027](https://github.com/incu6us/open-context/commit/6373027cc3c7983d09ceb599792094d8ce94f781))
+
 ## [1.3.3](https://github.com/incu6us/open-context/compare/v1.3.2...v1.3.3) (2026-03-24)
 
 
