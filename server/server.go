@@ -120,6 +120,12 @@ func (s *MCPServer) Serve(stdin io.Reader, stdout, stderr io.Writer) error {
 			continue
 		}
 
+		// Notifications have no ID and must not receive a response
+		if req.ID == nil {
+			log.Printf("Received notification: %s", req.Method)
+			continue
+		}
+
 		resp := s.handleRequest(req)
 		if err := encoder.Encode(resp); err != nil {
 			log.Printf("Error encoding response: %v", err)
