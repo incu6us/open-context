@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-test:
     name: Build and Test
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -62,6 +63,7 @@ jobs:
 
   lint:
     name: Lint
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -81,6 +83,7 @@ jobs:
 
   format-check:
     name: Format Check
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -185,7 +188,7 @@ jobs:
               "@semantic-release/git",
               {
                 "assets": ["CHANGELOG.md"],
-                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+                "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
               }
             ]
           ]
