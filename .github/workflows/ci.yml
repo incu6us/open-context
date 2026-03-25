@@ -119,12 +119,6 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.25.x'
-        cache: true
-
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -138,78 +132,7 @@ jobs:
           @semantic-release/changelog@6 \
           @semantic-release/commit-analyzer@11 \
           @semantic-release/release-notes-generator@12 \
-          @semantic-release/github@9 \
-          @semantic-release/exec@6 \
           conventional-changelog-conventionalcommits@7
-
-    - name: Create build script
-      run: |
-        cat > build-binaries.sh << 'EOF'
-        #!/bin/bash
-        set -e
-
-        VERSION=$1
-        COMMIT=$(git rev-parse HEAD)
-        SOURCE_URL="https://github.com/$GITHUB_REPOSITORY"
-        GO_VERSION=$(go version | awk '{print $3}')
-
-        echo "Building binaries with version: $VERSION"
-        echo "Commit: $COMMIT"
-        echo "Go version: $GO_VERSION"
-
-        mkdir -p release-binaries
-
-        # Build matrix
-        declare -a builds=(
-          "linux:amd64:"
-          "linux:arm64:"
-          "linux:arm:7"
-          "darwin:amd64:"
-          "darwin:arm64:"
-          "windows:amd64:"
-          "windows:arm64:"
-        )
-
-        for build in "${builds[@]}"; do
-          IFS=':' read -r GOOS GOARCH GOARM <<< "$build"
-
-          if [ "$GOOS" = "windows" ]; then
-            if [ -n "$GOARM" ]; then
-              OUTPUT="open-context_${GOOS}_${GOARCH}v${GOARM}.exe"
-            else
-              OUTPUT="open-context_${GOOS}_${GOARCH}.exe"
-            fi
-          else
-            if [ -n "$GOARM" ]; then
-              OUTPUT="open-context_${GOOS}_${GOARCH}v${GOARM}"
-            else
-              OUTPUT="open-context_${GOOS}_${GOARCH}"
-            fi
-          fi
-
-          echo "Building $OUTPUT..."
-
-          LDFLAGS="-s -w"
-          LDFLAGS="$LDFLAGS -X 'main.Tag=$VERSION'"
-          LDFLAGS="$LDFLAGS -X 'main.Commit=$COMMIT'"
-          LDFLAGS="$LDFLAGS -X 'main.SourceURL=$SOURCE_URL'"
-          LDFLAGS="$LDFLAGS -X 'main.GoVersion=$GO_VERSION'"
-
-          if [ -n "$GOARM" ]; then
-            GOOS=$GOOS GOARCH=$GOARCH GOARM=$GOARM go build -v -o "release-binaries/$OUTPUT" -ldflags="$LDFLAGS"
-          else
-            GOOS=$GOOS GOARCH=$GOARCH go build -v -o "release-binaries/$OUTPUT" -ldflags="$LDFLAGS"
-          fi
-
-          if [ "$GOOS" != "windows" ]; then
-            chmod +x "release-binaries/$OUTPUT"
-          fi
-        done
-
-        ls -lah release-binaries/
-        EOF
-
-        chmod +x build-binaries.sh
 
     - name: Create .releaserc.json
       run: |
@@ -258,28 +181,6 @@ jobs:
               }
             ],
             "@semantic-release/changelog",
-            [
-              "@semantic-release/exec",
-              {
-                "prepareCmd": "./build-binaries.sh v${nextRelease.version}"
-              }
-            ],
-            [
-              "@semantic-release/github",
-              {
-                "assets": [
-                  {"path": "release-binaries/open-context_linux_amd64"},
-                  {"path": "release-binaries/open-context_linux_arm64"},
-                  {"path": "release-binaries/open-context_linux_armv7"},
-                  {"path": "release-binaries/open-context_darwin_amd64"},
-                  {"path": "release-binaries/open-context_darwin_arm64"},
-                  {"path": "release-binaries/open-context_windows_amd64.exe"},
-                  {"path": "release-binaries/open-context_windows_arm64.exe"}
-                ],
-                "successComment": false,
-                "failComment": false
-              }
-            ],
             [
               "@semantic-release/git",
               {

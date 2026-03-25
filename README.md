@@ -36,7 +36,14 @@ Open Context fetches and caches documentation from official sources, making it i
 
 ### 1. Install
 
-**Using the install script (recommended):**
+**Using Homebrew (macOS/Linux):**
+
+```bash
+brew tap incu6us/homebrew-tap
+brew install open-context
+```
+
+**Using the install script:**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/incu6us/open-context/master/install.sh | bash
@@ -50,7 +57,7 @@ cd open-context
 go build -o open-context
 ```
 
-**Prerequisites**: Go 1.25 or higher
+**Prerequisites for building**: Go 1.25 or higher
 
 ### 2. Configure Your MCP Client
 
@@ -138,6 +145,13 @@ Claude will automatically fetch and use the documentation to answer your questio
 ---
 
 ## Installation Options
+
+### Homebrew (macOS/Linux)
+
+```bash
+brew tap incu6us/homebrew-tap
+brew install open-context
+```
 
 ### Quick Install Script
 

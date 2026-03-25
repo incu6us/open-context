@@ -1,0 +1,61 @@
+version: 2
+
+project_name: open-context
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - binary: open-context
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "7"
+    ignore:
+      - goos: darwin
+        goarch: arm
+      - goos: windows
+        goarch: arm
+    ldflags:
+      - -s -w
+      - -X 'main.Tag={{ .Tag }}'
+      - -X 'main.Commit={{ .Commit }}'
+      - -X 'main.SourceURL=https://github.com/incu6us/open-context'
+      - -X 'main.GoVersion={{ .Env.GO_VERSION }}'
+
+archives:
+  - formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  disable: true
+
+brews:
+  - name: open-context
+    repository:
+      owner: incu6us
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/incu6us/open-context"
+    description: "MCP server providing documentation for programming languages and frameworks"
+    license: "MIT"
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/open-context --version")
