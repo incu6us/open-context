@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/incu6us/open-context/compare/v1.3.5...v1.3.6) (2026-03-25)
+
+
+### Bug Fixes
+
+* brew installation added ([689898e](https://github.com/incu6us/open-context/commit/689898e3730cb5b97e15c45375ccca939ace31a0))
+
 ## [1.3.5](https://github.com/incu6us/open-context/compare/v1.3.4...v1.3.5) (2026-03-25)
 
 
